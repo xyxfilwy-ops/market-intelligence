@@ -102,8 +102,6 @@ function Counter({ target, suffix = '', decimals = 2 }: CounterProps) {
 
 /* ─── Stock Card ─── */
 function StockCard({ stock, maxChange }: { stock: StockData; maxChange: number }) {
-  const barHeight = (stock.change / maxChange) * 100
-
   return (
     <section
       className={`stock-card py-20 ${stock.isMirror ? 'bg-charcoal' : 'bg-obsidian'}`}

@@ -98,60 +98,6 @@ function CustomTooltip({ active, payload, label }: TooltipProps<ValueType, NameT
   )
 }
 
-/* ─── Counter Animation Utility ─── */
-function useCounterAnimation(
-  ref: React.RefObject<HTMLSpanElement | null>,
-  target: number,
-  decimals: number,
-  delay: number,
-  scrollTriggerRef: React.RefObject<HTMLElement | null>
-) {
-  useGSAP(() => {
-    if (!ref.current || !scrollTriggerRef.current) return
-    const obj = { val: 0 }
-    gsap.to(obj, {
-      val: target,
-      duration: 1.5,
-      delay,
-      ease: 'power2.out',
-      scrollTrigger: { trigger: scrollTriggerRef.current, start: 'top 85%' },
-      onUpdate: () => {
-        if (ref.current) {
-          ref.current.textContent = obj.val.toFixed(decimals)
-        }
-      },
-    })
-  }, { scope: scrollTriggerRef })
-}
-
-/* ─── Mini Sparkline ─── */
-function MiniSparkline({ data, color }: { data: number[]; color: string }) {
-  const width = 120
-  const height = 40
-  const min = Math.min(...data)
-  const max = Math.max(...data)
-  const range = max - min || 1
-
-  const points = data.map((val, i) => {
-    const x = (i / (data.length - 1)) * width
-    const y = height - ((val - min) / range) * height
-    return `${x},${y}`
-  })
-
-  return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      <polyline
-        fill="none"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        points={points.join(' ')}
-      />
-    </svg>
-  )
-}
-
 /* ─── Section 1: Hero ─── */
 function HeroSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
