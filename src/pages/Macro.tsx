@@ -4,7 +4,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Sector } from 'recharts'
-import macroBg from '../../assets/macro-bg.jpg'
+import macroBg from '../assets/macro-bg.jpg'
 
 gsap.registerPlugin(ScrollTrigger)
 

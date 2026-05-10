@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import heroBg from '../../assets/hero-bg.jpg'
+import heroBg from '../assets/hero-bg.jpg'
 
 gsap.registerPlugin(ScrollTrigger)
 

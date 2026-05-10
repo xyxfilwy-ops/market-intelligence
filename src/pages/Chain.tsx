@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import chipBg from '../../assets/chip-abstract.jpg'
+import chipBg from '../assets/chip-abstract.jpg'
 
 gsap.registerPlugin(ScrollTrigger)
 
