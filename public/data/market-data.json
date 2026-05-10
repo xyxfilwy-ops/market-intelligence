@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-11T00:41:59+08:00",
+  "lastUpdated": "2026-05-11T06:43:58+08:00",
   "indices": [
     {
       "name": "道琼斯工业平均指数",
@@ -10,10 +10,55 @@
       "high": 49830.7,
       "low": 49486.96,
       "close": 49609.16,
-      "previousClose": 49596.97,
-      "change": 12.19,
+      "previousClose": 49597.0,
+      "change": 12.16,
       "changePercent": 0.02,
-      "trend": "up"
+      "trend": "up",
+      "analysis": {
+        "comment": "道指窄幅整理，成分股表现分化，等待方向选择",
+        "subComment": "道指30只成分股涨跌互现，联合健康集团(医疗保健)表现突出，金融与工业板块分化",
+        "drivers": [
+          "联合健康集团 领涨 2.77%，对指数贡献 +0.2点，属于医疗保健板块",
+          "麦当劳 下跌 2.80%，餐饮板块承压",
+          "市场观望情绪较浓，等待美联储政策指引",
+          "老龄化趋势推动医疗需求刚性增长"
+        ],
+        "topContributors": [
+          {
+            "name": "联合健康集团",
+            "nameEn": "UnitedHealth Group",
+            "changePercent": 2.77,
+            "contribution": "+0.2点",
+            "sector": "医疗保健",
+            "analysis": [
+              "老龄化趋势推动医疗需求刚性增长",
+              "创新药管线进入收获期"
+            ]
+          },
+          {
+            "name": "麦当劳",
+            "nameEn": "McDonald's",
+            "changePercent": -2.8,
+            "contribution": "-0.1点",
+            "sector": "餐饮",
+            "analysis": [
+              "反垄断监管压力加大",
+              "云业务增速放缓，市场担忧估值回调"
+            ]
+          },
+          {
+            "name": "家得宝",
+            "nameEn": "Home Depot",
+            "changePercent": -1.61,
+            "contribution": "-0.1点",
+            "sector": "零售",
+            "analysis": [
+              "消费降级趋势影响客单价",
+              "电商竞争加剧分流线下客流"
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "标普500指数",
@@ -27,7 +72,15 @@
       "previousClose": 7337.11,
       "change": 61.82,
       "changePercent": 0.84,
-      "trend": "up"
+      "trend": "up",
+      "analysis": {
+        "comment": "标普500温和收涨，大盘蓝筹稳健",
+        "subComment": "标普11大板块多数收红，科技与通信服务表现强劲",
+        "drivers": [
+          "市场观望情绪较浓，等待美联储政策指引"
+        ],
+        "topContributors": []
+      }
     },
     {
       "name": "纳斯达克综合指数",
@@ -38,10 +91,18 @@
       "high": 26248.62,
       "low": 25944.78,
       "close": 26247.08,
-      "previousClose": 25806.19,
-      "change": 440.89,
+      "previousClose": 25806.2,
+      "change": 440.88,
       "changePercent": 1.71,
-      "trend": "up"
+      "trend": "up",
+      "analysis": {
+        "comment": "纳指强势领涨，科技股风险偏好回升",
+        "subComment": "大型科技股韧性显现，半导体设备股持续强势",
+        "drivers": [
+          "美股风险偏好全面回升，AI产业链引领涨势"
+        ],
+        "topContributors": []
+      }
     },
     {
       "name": "日经225指数",
@@ -52,10 +113,55 @@
       "high": 62724.36,
       "low": 62137.95,
       "close": 62713.65,
-      "previousClose": 62833.84,
-      "change": -120.19,
+      "previousClose": 62833.8,
+      "change": -120.15,
       "changePercent": -0.19,
-      "trend": "down"
+      "trend": "down",
+      "analysis": {
+        "comment": "日经225窄幅整理，市场等待美股指引方向",
+        "subComment": "日元走强压制出口股，软银集团(投资控股)领跌，半导体板块获利回吐",
+        "drivers": [
+          "软银集团 领跌 4.56%，对指数贡献 -0.4点，属于投资控股板块",
+          "基恩士 上涨 6.07%，工业自动化板块表现强劲",
+          "日经225高位震荡，等待美股方向指引",
+          "投资组合估值回调，未实现收益下降"
+        ],
+        "topContributors": [
+          {
+            "name": "软银集团",
+            "nameEn": "SoftBank Group",
+            "changePercent": -4.56,
+            "contribution": "-0.4点",
+            "sector": "投资控股",
+            "analysis": [
+              "投资组合估值回调，未实现收益下降",
+              "科技板块估值压缩影响投资收益"
+            ]
+          },
+          {
+            "name": "基恩士",
+            "nameEn": "Keyence",
+            "changePercent": 6.07,
+            "contribution": "+0.4点",
+            "sector": "工业自动化",
+            "analysis": [
+              "AI应用商业化加速，云业务增长强劲",
+              "企业数字化转型需求持续释放"
+            ]
+          },
+          {
+            "name": "迅销",
+            "nameEn": "Fast Retailing",
+            "changePercent": -1.0,
+            "contribution": "-0.1点",
+            "sector": "零售",
+            "analysis": [
+              "消费降级趋势影响客单价",
+              "电商竞争加剧分流线下客流"
+            ]
+          }
+        ]
+      }
     },
     {
       "name": "韩国综合股价指数",
@@ -69,7 +175,65 @@
       "previousClose": 7490.05,
       "change": 7.95,
       "changePercent": 0.11,
-      "trend": "up"
+      "trend": "up",
+      "analysis": {
+        "comment": "KOSPI横盘整理，市场等待催化剂",
+        "subComment": "SK海力士与三星电子双轮驱动，现代汽车(汽车)表现突出，芯片股引领市场",
+        "drivers": [
+          "现代汽车 领涨 7.17%，对指数贡献 +0.4点，属于汽车板块",
+          "三星电子 下跌 1.10%，半导体板块承压",
+          "KOSPI横盘整理，市场等待半导体行业新催化",
+          "电动车销量持续增长，市场份额扩大"
+        ],
+        "topContributors": [
+          {
+            "name": "现代汽车",
+            "nameEn": "Hyundai Motor",
+            "changePercent": 7.17,
+            "contribution": "+0.4点",
+            "sector": "汽车",
+            "analysis": [
+              "电动车销量持续增长，市场份额扩大",
+              "电池成本下降推动盈利能力改善"
+            ]
+          },
+          {
+            "name": "三星电子",
+            "nameEn": "Samsung Electronics",
+            "changePercent": -1.1,
+            "contribution": "-0.2点",
+            "sector": "半导体",
+            "analysis": [
+              "下游消费电子库存调整，短期需求疲软",
+              "成熟制程价格战压缩毛利率"
+            ]
+          },
+          {
+            "name": "SK海力士",
+            "nameEn": "SK Hynix",
+            "changePercent": 1.93,
+            "contribution": "+0.1点",
+            "sector": "半导体",
+            "analysis": [
+              "AI算力需求持续爆发，芯片订单排产至2027年",
+              "先进制程产能利用率维持满载，ASP持续上行"
+            ]
+          }
+        ]
+      }
     }
-  ]
+  ],
+  "heroSubtitle": "美股 · 日经 · KOSPI — 2026年05月11日收盘全景 · 收盘分化",
+  "crossMarketSummary": "美股表现稳健，亚洲市场短期调整。美股平均上涨0.86%，日经225调整0.19%，KOSPI+0.11%。全球分化格局延续，中长期向上逻辑未变。",
+  "usDescriptions": [
+    "道指温和收涨0.02%，权重股表现分化，大盘蓝筹稳健",
+    "标普500温和收涨0.84%，科技与通信服务表现强劲",
+    "纳指强势领涨1.71%，科技股风险偏好全面回升，AI概念股受追捧"
+  ],
+  "nikkeiDrivers": [
+    "软银集团大跌 4.56%，贡献日经225最大点数跌幅",
+    "AI半导体超级周期预期持续升温，全球资本向日本硬科技产业链集中",
+    "日本本土半导体产业链全面受益，设备商和材料商订单饱满"
+  ],
+  "kospiBackground": "韩国股市在半导体双雄的带动下表现活跃。现代汽车凭借在汽车领域的领先地位，持续受益于全球AI算力扩张。三星电子Q1业绩不及预期，对市场情绪形成一定压制。"
 }

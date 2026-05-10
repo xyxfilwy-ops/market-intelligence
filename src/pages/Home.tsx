@@ -12,6 +12,20 @@ const trendClass = (change: number) => change >= 0 ? 'text-rise-green' : 'text-f
 const trendBorderColor = (change: number) => change >= 0 ? '#FF6B6B' : '#1DB954'
 
 /* ─── Data Types ─── */
+interface IndexAnalysis {
+  comment: string
+  subComment: string
+  drivers: string[]
+  topContributors: Array<{
+    name: string
+    nameEn: string
+    changePercent: number
+    contribution: string
+    sector: string
+    analysis: string[]
+  }>
+}
+
 interface MarketData {
   lastUpdated: string
   indices: Array<{
@@ -28,6 +42,7 @@ interface MarketData {
     low: number
     previousClose: number
     sparkline?: number[]
+    analysis?: IndexAnalysis
   }>
 }
 
@@ -631,6 +646,9 @@ function generateHeroSubtitle(indices: MarketData['indices']): string {
 }
 
 function generateIndexComment(idx: MarketData['indices'][0]): string {
+  // Prefer dynamic analysis from data file
+  if (idx.analysis?.comment) return idx.analysis.comment
+
   const cp = idx.changePercent
   if (idx.symbol === '^DJI') {
     if (cp >= 1) return '道指成分股普涨，工业与金融板块协同发力'
@@ -671,6 +689,9 @@ function generateIndexComment(idx: MarketData['indices'][0]): string {
 }
 
 function generateIndexSubComment(idx: MarketData['indices'][0]): string {
+  // Prefer dynamic analysis from data file
+  if (idx.analysis?.subComment) return idx.analysis.subComment
+
   const cp = idx.changePercent
   if (idx.symbol === '^DJI') {
     if (cp >= 0) return '道指30只成分股中涨跌互现，金融与工业板块分化'

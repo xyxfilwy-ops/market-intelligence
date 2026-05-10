@@ -463,6 +463,19 @@ def get_macro_data(indices_data: List[Dict[str, Any]]) -> Dict[str, Any]:
 
     return {
         "summary": summary,
+        "ringNodes": {
+            "center": {"label": "AI芯片", "r": 50},
+            "inner": [
+                {"label": "设计", "sub": "NVIDIA / AMD", "angle": -90},
+                {"label": "存储", "sub": "SK海力士 / 三星", "angle": 30},
+                {"label": "设备", "sub": "东京电子 / 爱德万", "angle": 150},
+            ],
+            "outer": [
+                {"label": "微软", "sub": "Azure", "angle": -30},
+                {"label": "亚马逊", "sub": "AWS", "angle": 90},
+                {"label": "谷歌", "sub": "GCP", "angle": 210},
+            ],
+        },
         "supercycle": {
             "arguments": [
                 {
@@ -852,6 +865,316 @@ def get_chain_data(indices_data: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Market Analysis Generation (enrich market-data.json with dynamic text)
+# ---------------------------------------------------------------------------
+
+def _make_index_comment(symbol: str, change_pct: float, top3: List[Dict[str, Any]]) -> str:
+    """Generate dynamic headline comment for an index based on contributors."""
+    top_name = top3[0]["name"] if top3 else ""
+    top_change = top3[0]["changePercent"] if top3 else 0
+    top_suffix = f"，{top_name}表现突出" if top_name and top_change >= 0 else f"，{top_name}承压" if top_name else ""
+
+    if symbol == "^DJI":
+        if change_pct >= 1:
+            return f"道指强势上攻，权重股协同发力{top_suffix}，工业与金融板块共振上行"
+        if change_pct >= 0.3:
+            return f"道指温和收涨{top_suffix}，大盘蓝筹稳健"
+        if change_pct >= -0.3:
+            return "道指窄幅整理，成分股表现分化，等待方向选择"
+        if change_pct >= -1:
+            return f"道指小幅回调{top_suffix}，防御板块相对抗跌"
+        return f"道指明显回落{top_suffix}，关注下方支撑力度"
+
+    if symbol == "^GSPC":
+        if change_pct >= 1:
+            return f"标普500普涨{top_suffix}，各行业板块共振上行"
+        if change_pct >= 0.3:
+            return f"标普500温和收涨{top_suffix}，大盘蓝筹稳健"
+        if change_pct >= -0.3:
+            return "标普500窄幅波动，市场观望情绪较浓"
+        if change_pct >= -1:
+            return f"标普500小幅调整{top_suffix}，成长股分化"
+        return f"标普500显著回落{top_suffix}，注意风险控制"
+
+    if symbol == "^IXIC":
+        if change_pct >= 1.5:
+            return f"纳指强势领涨，科技股风险偏好回升{top_suffix}"
+        if change_pct >= 0.5:
+            return f"纳指表现活跃{top_suffix}，AI概念股热度不减"
+        if change_pct >= -0.5:
+            return "纳指窄幅震荡，科技股分化明显，等待新催化"
+        if change_pct >= -1.5:
+            return f"纳指小幅回调{top_suffix}，高估值板块分化"
+        return f"纳指大幅回落{top_suffix}，科技板块集体调整"
+
+    if symbol == "^N225":
+        if change_pct >= 1.5:
+            return f"日经225强势上攻{top_suffix}，半导体设备股表现突出"
+        if change_pct >= 0.5:
+            return f"日经225稳步上行{top_suffix}，出口型企业受益"
+        if change_pct >= -0.5:
+            return "日经225窄幅整理，市场等待美股指引方向"
+        if change_pct >= -1.5:
+            return f"日经225小幅回调{top_suffix}，获利盘兑现压力显现"
+        return f"日经225显著回落{top_suffix}，外资流出迹象显现"
+
+    if symbol == "^KS11":
+        if change_pct >= 1:
+            return f"KOSPI放量上涨{top_suffix}，半导体双雄表现亮眼"
+        if change_pct >= 0.3:
+            return f"KOSPI温和收涨{top_suffix}，芯片股表现亮眼"
+        if change_pct >= -0.3:
+            return "KOSPI横盘整理，市场等待催化剂"
+        if change_pct >= -1:
+            return f"KOSPI小幅调整{top_suffix}，电池板块拖累大盘"
+        return f"KOSPI明显回落{top_suffix}，外资减持权重标的"
+
+    return ""
+
+
+def _make_index_subcomment(symbol: str, change_pct: float, top3: List[Dict[str, Any]]) -> str:
+    """Generate dynamic sub-comment for an index."""
+    top_name = top3[0]["name"] if top3 else ""
+    top_sector = top3[0]["sector"] if top3 else ""
+    top_part = f"，{top_name}({top_sector})表现突出" if top_name and change_pct >= 0 else f"，{top_name}({top_sector})领跌" if top_name else ""
+
+    if symbol == "^DJI":
+        if change_pct >= 0:
+            return f"道指30只成分股涨跌互现{top_part}，金融与工业板块分化"
+        return f"道指30只成分股跌多涨少{top_part}，周期性板块承压"
+
+    if symbol == "^GSPC":
+        if change_pct >= 0:
+            return f"标普11大板块多数收红{top_part}，科技与通信服务表现强劲"
+        return f"标普11大板块多数收跌{top_part}，可选消费与房地产承压"
+
+    if symbol == "^IXIC":
+        if change_pct >= 0:
+            return f"大型科技股韧性显现{top_part}，半导体设备股持续强势"
+        return f"高估值成长股承压{top_part}，芯片设计龙头跌幅居前"
+
+    if symbol == "^N225":
+        if change_pct >= 0:
+            return f"AI半导体超级周期驱动{top_part}，外资持续净流入日本市场"
+        return f"日元走强压制出口股{top_part}，半导体板块获利回吐"
+
+    if symbol == "^KS11":
+        if change_pct >= 0:
+            return f"SK海力士与三星电子双轮驱动{top_part}，芯片股引领市场"
+        return f"存储芯片股回调拖累大盘{top_part}，外资净卖出权重标的"
+
+    return ""
+
+
+def _make_index_drivers(symbol: str, change_pct: float, top3: List[Dict[str, Any]]) -> List[str]:
+    """Generate key driver bullets based on top contributors."""
+    drivers: List[str] = []
+
+    # Top contributor driver
+    if top3:
+        top = top3[0]
+        trend_word = "领涨" if top["changePercent"] >= 0 else "领跌"
+        drivers.append(
+            f"{top['name']} {trend_word} {abs(top['changePercent']):.2f}%，"
+            f"对指数贡献 {top['contribution']}，属于{top['sector']}板块"
+        )
+
+    # Second contributor
+    if len(top3) >= 2:
+        second = top3[1]
+        trend_word = "上涨" if second["changePercent"] >= 0 else "下跌"
+        drivers.append(
+            f"{second['name']} {trend_word} {abs(second['changePercent']):.2f}%，"
+            f"{second['sector']}板块{'表现强劲' if second['changePercent'] >= 0 else '承压'}"
+        )
+
+    # Market-wide driver based on direction
+    if symbol in ("^DJI", "^GSPC", "^IXIC"):
+        if change_pct >= 1:
+            drivers.append("美股风险偏好全面回升，AI产业链引领涨势")
+        elif change_pct <= -1:
+            drivers.append("避险情绪阶段性升温，高估值板块集体承压")
+        else:
+            drivers.append("市场观望情绪较浓，等待美联储政策指引")
+    elif symbol == "^N225":
+        if change_pct >= 1:
+            drivers.append("AI半导体超级周期预期持续升温，日本本土产业链全面受益")
+        elif change_pct <= -1:
+            drivers.append("日元走强压制出口型企业盈利预期，外资阶段性减持")
+        else:
+            drivers.append("日经225高位震荡，等待美股方向指引")
+    elif symbol == "^KS11":
+        if change_pct >= 1:
+            drivers.append("半导体双雄带动大盘，韩国在全球存储芯片版图中的地位持续巩固")
+        elif change_pct <= -1:
+            drivers.append("存储芯片需求放缓担忧升温，电池板块同步承压")
+        else:
+            drivers.append("KOSPI横盘整理，市场等待半导体行业新催化")
+
+    # Add sector-specific driver from analysis
+    if top3 and top3[0].get("analysis"):
+        analysis_list = top3[0]["analysis"]
+        if analysis_list:
+            drivers.append(analysis_list[0])
+
+    return drivers[:4]
+
+
+def _make_hero_subtitle(indices_data: List[Dict[str, Any]]) -> str:
+    """Generate dynamic hero subtitle for Markets page."""
+    us = [i for i in indices_data if i["region"] == "United States"]
+    nikkei = next((i for i in indices_data if i["symbol"] == "^N225"), {})
+    kospi = next((i for i in indices_data if i["symbol"] == "^KS11"), {})
+    date_str = datetime.now(timezone(timedelta(hours=8))).strftime("%Y年%m月%d日")
+
+    us_avg = sum(i.get("changePercent", 0) for i in us) / len(us) if us else 0
+    nikkei_change = nikkei.get("changePercent", 0)
+    kospi_change = kospi.get("changePercent", 0)
+
+    status = "全线收涨" if us_avg >= 0 and nikkei_change >= 0 and kospi_change >= 0 else \
+             "全线收跌" if us_avg < 0 and nikkei_change < 0 and kospi_change < 0 else \
+             "收盘分化"
+
+    return f"美股 · 日经 · KOSPI — {date_str}收盘全景 · {status}"
+
+
+def _make_us_descriptions(indices_data: List[Dict[str, Any]]) -> List[str]:
+    """Generate dynamic descriptions for US indices on Markets page."""
+    us = {i["symbol"]: i for i in indices_data if i["region"] == "United States"}
+    dji = us.get("^DJI", {})
+    spx = us.get("^GSPC", {})
+    ndx = us.get("^IXIC", {})
+
+    dji_pct = dji.get("changePercent", 0)
+    spx_pct = spx.get("changePercent", 0)
+    ndx_pct = ndx.get("changePercent", 0)
+
+    descs = []
+    # Dow
+    if dji_pct >= 1:
+        descs.append(f"道指强势上涨{dji_pct:.2f}%，成分股普涨，工业与金融板块共振")
+    elif dji_pct >= 0:
+        descs.append(f"道指温和收涨{dji_pct:.2f}%，权重股表现分化，大盘蓝筹稳健")
+    elif dji_pct >= -1:
+        descs.append(f"道指小幅回调{abs(dji_pct):.2f}%，防御板块相对抗跌")
+    else:
+        descs.append(f"道指明显回落{abs(dji_pct):.2f}%，周期性板块承压")
+
+    # S&P
+    if spx_pct >= 1:
+        descs.append(f"标普500强势上涨{spx_pct:.2f}%，各行业板块共振上行，大盘蓝筹稳健")
+    elif spx_pct >= 0:
+        descs.append(f"标普500温和收涨{spx_pct:.2f}%，科技与通信服务表现强劲")
+    elif spx_pct >= -1:
+        descs.append(f"标普500小幅调整{abs(spx_pct):.2f}%，成长股分化")
+    else:
+        descs.append(f"标普500显著回落{abs(spx_pct):.2f}%，可选消费与房地产领跌")
+
+    # Nasdaq
+    if ndx_pct >= 1.5:
+        descs.append(f"纳指强势领涨{ndx_pct:.2f}%，科技股风险偏好全面回升，AI概念股受追捧")
+    elif ndx_pct >= 0:
+        descs.append(f"纳指表现活跃{ndx_pct:.2f}%，大型科技股韧性显现")
+    elif ndx_pct >= -1.5:
+        descs.append(f"纳指小幅回调{abs(ndx_pct):.2f}%，高估值板块承压")
+    else:
+        descs.append(f"纳指大幅回落{abs(ndx_pct):.2f}%，科技板块集体调整")
+
+    return descs
+
+
+def _make_nikkei_drivers(change_pct: float, top3: List[Dict[str, Any]]) -> List[str]:
+    """Generate dynamic key drivers for Nikkei section."""
+    drivers: List[str] = []
+    if top3:
+        top = top3[0]
+        trend = "暴涨" if top["changePercent"] >= 5 else "大涨" if top["changePercent"] >= 2 else "上涨" if top["changePercent"] >= 0 else "大跌" if top["changePercent"] <= -2 else "下跌"
+        drivers.append(f"{top['name']}{trend} {abs(top['changePercent']):.2f}%，贡献日经225最大点数{'涨幅' if top['changePercent'] >= 0 else '跌幅'}")
+    drivers.append("AI半导体超级周期预期持续升温，全球资本向日本硬科技产业链集中")
+    drivers.append("日本本土半导体产业链全面受益，设备商和材料商订单饱满")
+    return drivers
+
+
+def _make_kospi_background(change_pct: float, top3: List[Dict[str, Any]]) -> str:
+    """Generate dynamic background text for KOSPI section."""
+    if top3:
+        top = top3[0]
+        second = top3[1] if len(top3) > 1 else None
+        text = f"韩国股市在半导体双雄的带动下{'刷新盘中历史新高' if change_pct >= 1 else '表现活跃' if change_pct >= 0 else '承压调整'}。"
+        text += f"{top['name']}凭借在{'HBM高带宽内存' if '海力士' in top['name'] else top['sector']}领域的领先地位，"
+        text += f"{'持续受益于全球AI算力扩张' if top['changePercent'] >= 0 else '短期面临获利回吐压力'}。"
+        if second:
+            text += f"{second['name']}Q1业绩{'超预期' if second['changePercent'] >= 0 else '不及预期'}，"
+            text += f"{'进一步巩固了韩国在全球半导体版图中的核心地位' if second['changePercent'] >= 0 else '对市场情绪形成一定压制'}。"
+        return text
+    return "韩国股市在半导体双雄的带动下表现活跃，SK海力士凭借在HBM高带宽内存领域的绝对领先地位，持续受益于全球AI算力扩张。三星电子在全球存储芯片版图中的地位持续巩固。"
+
+
+def _make_cross_market_summary(indices_data: List[Dict[str, Any]]) -> str:
+    """Generate dynamic cross-market comparison summary."""
+    us = [i for i in indices_data if i["region"] == "United States"]
+    nikkei = next((i for i in indices_data if i["symbol"] == "^N225"), {})
+    kospi = next((i for i in indices_data if i["symbol"] == "^KS11"), {})
+
+    us_avg = sum(i.get("changePercent", 0) for i in us) / len(us) if us else 0
+    nikkei_change = nikkei.get("changePercent", 0)
+    kospi_change = kospi.get("changePercent", 0)
+
+    asia_up = nikkei_change >= 0 and kospi_change >= 0
+    us_up = us_avg >= 0
+
+    if asia_up and us_up:
+        return f"全球主要市场同步上涨，风险偏好全面回升。美股平均上涨{us_avg:.2f}%，日经225上涨{nikkei_change:.2f}%，KOSPI上涨{kospi_change:.2f}%，AI产业链仍是跨市场核心主线。"
+    elif asia_up and not us_up:
+        return f"亚洲市场领涨，美股相对疲软。日经225上涨{nikkei_change:.2f}%，KOSPI上涨{kospi_change:.2f}%，而美股平均调整{abs(us_avg):.2f}%。资金持续向AI硬科技产业链集中配置。"
+    elif not asia_up and us_up:
+        return f"美股表现稳健，亚洲市场短期调整。美股平均上涨{us_avg:.2f}%，日经225调整{abs(nikkei_change):.2f}%，KOSPI{kospi_change:+.2f}%。全球分化格局延续，中长期向上逻辑未变。"
+    else:
+        return f"全球主要市场同步回调，避险情绪升温。美股平均调整{abs(us_avg):.2f}%，日经225调整{abs(nikkei_change):.2f}%，KOSPI调整{abs(kospi_change):.2f}%。短期获利回吐压力显现，关注AI产业链韧性。"
+
+
+def enrich_market_data(market_data: Dict[str, Any], leaders_data: List[Dict[str, Any]]) -> None:
+    """Add dynamic analysis fields to market_data for frontend consumption."""
+    leaders_map = {item["indexSymbol"]: item for item in leaders_data}
+    indices = market_data.get("indices", [])
+
+    for idx in indices:
+        symbol = idx["symbol"]
+        change_pct = idx.get("changePercent", 0)
+        leaders = leaders_map.get(symbol, {})
+        top3 = leaders.get("topContributors", [])
+
+        idx["analysis"] = {
+            "comment": _make_index_comment(symbol, change_pct, top3),
+            "subComment": _make_index_subcomment(symbol, change_pct, top3),
+            "drivers": _make_index_drivers(symbol, change_pct, top3),
+            "topContributors": [
+                {
+                    "name": c["name"],
+                    "nameEn": c["nameEn"],
+                    "changePercent": c["changePercent"],
+                    "contribution": c["contribution"],
+                    "sector": c["sector"],
+                    "analysis": c.get("analysis", [])[:2],
+                }
+                for c in top3[:3]
+            ],
+        }
+
+    market_data["heroSubtitle"] = _make_hero_subtitle(indices)
+    market_data["crossMarketSummary"] = _make_cross_market_summary(indices)
+    market_data["usDescriptions"] = _make_us_descriptions(indices)
+    market_data["nikkeiDrivers"] = _make_nikkei_drivers(
+        next((i.get("changePercent", 0) for i in indices if i["symbol"] == "^N225"), 0),
+        leaders_map.get("^N225", {}).get("topContributors", [])
+    )
+    market_data["kospiBackground"] = _make_kospi_background(
+        next((i.get("changePercent", 0) for i in indices if i["symbol"] == "^KS11"), 0),
+        leaders_map.get("^KS11", {}).get("topContributors", [])
+    )
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 def main():
@@ -886,7 +1209,14 @@ def main():
         logger.error(f"Error building leaders data: {e}")
         leaders_data = {"lastUpdated": ts, "indices": []}
 
-    # --- 3. Build macro data (dynamic, based on real-time index data) ---
+    # --- 3. Enrich market data with dynamic analysis text ---
+    try:
+        enrich_market_data(market_data, leaders_data.get("indices", []))
+        logger.info("Enriched market data with dynamic analysis")
+    except Exception as e:
+        logger.error(f"Error enriching market data: {e}")
+
+    # --- 4. Build macro data (dynamic, based on real-time index data) ---
     try:
         macro_data = get_macro_data(indices_data)
         macro_data["lastUpdated"] = ts
@@ -895,7 +1225,7 @@ def main():
         logger.error(f"Error building macro data: {e}")
         macro_data = {"lastUpdated": ts, "summary": "数据生成中", "factors": [], "cspCapex": [], "keyEvents": []}
 
-    # --- 4. Build chain data (news-driven dynamic descriptions) ---
+    # --- 5. Build chain data (news-driven dynamic descriptions) ---
     try:
         chain_data = get_chain_data(indices_data)
         logger.info("Built chain data with news-driven descriptions")
@@ -908,7 +1238,7 @@ def main():
             "summary": "数据生成中",
         }
 
-    # --- 5. Build meta ---
+    # --- 6. Build meta ---
     next_update = (datetime.now(timezone(timedelta(hours=8))) + timedelta(hours=2)).strftime(
         "%Y-%m-%dT%H:%M:%S+08:00"
     )

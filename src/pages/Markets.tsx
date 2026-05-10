@@ -27,6 +27,22 @@ const trendRgba = (change: number, alpha: number) => change >= 0 ? `rgba(255,107
 const trendBgRgba = (change: number, alpha: number) => change >= 0 ? `rgba(255,107,107,${alpha})` : `rgba(29,185,84,${alpha})`
 
 /* ─── Data Types ─── */
+interface ContributorData {
+  name: string
+  nameEn: string
+  changePercent: number
+  contribution: string
+  sector: string
+  analysis: string[]
+}
+
+interface IndexAnalysis {
+  comment: string
+  subComment: string
+  drivers: string[]
+  topContributors: ContributorData[]
+}
+
 interface IndexData {
   name: string
   nameEn: string
@@ -42,11 +58,17 @@ interface IndexData {
   previousClose: number
   sparkline?: number[]
   intraday?: Array<{ time: string; value: number }>
+  analysis?: IndexAnalysis
 }
 
 interface MarketData {
   lastUpdated: string
   indices: IndexData[]
+  heroSubtitle?: string
+  crossMarketSummary?: string
+  usDescriptions?: string[]
+  nikkeiDrivers?: string[]
+  kospiBackground?: string
 }
 
 /* ─── Data Loading Hook ─── */
@@ -105,7 +127,7 @@ function CustomTooltip({ active, payload, label }: TooltipProps<ValueType, NameT
 }
 
 /* ─── Section 1: Hero ─── */
-function HeroSection() {
+function HeroSection({ subtitle }: { subtitle?: string }) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const backRef = useRef<HTMLAnchorElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
@@ -160,7 +182,7 @@ function HeroSection() {
           ref={subtitleRef}
           className="font-body text-[1.0625rem] leading-[1.7] text-silver opacity-0 translate-y-8"
         >
-          美股 · 日经 · KOSPI — 2026年5月7日收盘全景
+          {subtitle || '美股 · 日经 · KOSPI — 全球市场收盘全景'}
         </p>
       </div>
     </section>
@@ -184,11 +206,15 @@ function generateChartData(close: number, change: number) {
 }
 
 /* ─── Section 2: US Indices — one per large area ─── */
-function USIndicesSection({ indices }: { indices: IndexData[] }) {
+function USIndicesSection({ indices, descriptions }: { indices: IndexData[]; descriptions?: string[] }) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLDivElement>(null)
 
   const usIndices = indices.filter(i => i.region === 'United States')
+  const dateStr = indices[0]?.name ? new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }) : ''
+
+  const usAvg = usIndices.length ? usIndices.reduce((s, i) => s + i.changePercent, 0) / usIndices.length : 0
+  const status = usAvg >= 0 ? '全线收涨' : '全线收跌'
 
   useGSAP(() => {
     const ctx = gsap.context(() => {
@@ -208,11 +234,13 @@ function USIndicesSection({ indices }: { indices: IndexData[] }) {
     return () => ctx.revert()
   }, { scope: sectionRef })
 
-  const descriptions = [
-    '道指盘中一度突破50,000点大关，为历史首次，但收盘未能守住这一里程碑水平',
-    '标普500连续刷新历史新高后回落，2026年年内涨幅超25%',
-    '纳指相对抗跌，纳斯达克100指数逆势收涨+0.17%，大型科技股韧性显现',
+  const fallbackDescs = [
+    '道指成分股表现分化，大盘蓝筹稳健',
+    '标普500各行业板块共振上行，科技与通信服务表现强劲',
+    '纳指科技股活跃度较高，AI产业链引领市场',
   ]
+
+  const descs = descriptions && descriptions.length >= 3 ? descriptions : fallbackDescs
 
   return (
     <section ref={sectionRef} className="bg-obsidian py-20 md:py-[80px]">
@@ -225,7 +253,7 @@ function USIndicesSection({ indices }: { indices: IndexData[] }) {
             美股三大指数
           </h2>
           <p className="font-body text-[0.8125rem] text-muted">
-            2026年5月7日收盘 · 全线收跌
+            {dateStr}收盘 · {status}
           </p>
         </div>
 
@@ -233,6 +261,7 @@ function USIndicesSection({ indices }: { indices: IndexData[] }) {
         <div className="space-y-8">
           {usIndices.map((idx, i) => {
             const chartData = generateChartData(idx.close, idx.change)
+            const analysis = idx.analysis
             return (
               <div
                 key={idx.symbol}
@@ -260,8 +289,13 @@ function USIndicesSection({ indices }: { indices: IndexData[] }) {
                         </span>
                       </div>
                       <p className="font-body text-[0.8125rem] text-silver leading-relaxed">
-                        {descriptions[i]}
+                        {analysis?.comment || descs[i] || descs[0]}
                       </p>
+                      {analysis?.subComment && (
+                        <p className="font-body text-[0.75rem] text-muted mt-2 leading-relaxed">
+                          {analysis.subComment}
+                        </p>
+                      )}
                     </div>
 
                     {/* Right: Chart */}
@@ -317,7 +351,7 @@ function USIndicesSection({ indices }: { indices: IndexData[] }) {
 }
 
 /* ─── Section 3: Nikkei 225 ─── */
-function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
+function NikkeiSection({ nikkei, drivers }: { nikkei: IndexData; drivers?: string[] }) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<HTMLDivElement>(null)
@@ -327,8 +361,6 @@ function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
   const closeRef = useRef<HTMLSpanElement>(null)
   const pointsRef = useRef<HTMLSpanElement>(null)
   const pctRef = useRef<HTMLSpanElement>(null)
-
-  // Counter animations removed - values rendered statically
 
   useGSAP(() => {
     const ctx = gsap.context(() => {
@@ -350,9 +382,9 @@ function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
         })
       }
 
-      const drivers = driversRef.current?.querySelectorAll('.driver-item')
-      if (drivers) {
-        gsap.from(drivers, {
+      const driverEls = driversRef.current?.querySelectorAll('.driver-item')
+      if (driverEls) {
+        gsap.from(driverEls, {
           x: -20, duration: 0.6, stagger: 0.1, ease: 'power2.out',
           scrollTrigger: { trigger: driversRef.current, start: 'top 85%' },
         })
@@ -362,6 +394,13 @@ function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
   }, { scope: sectionRef })
 
   const intraday = nikkei.intraday ?? generateChartData(nikkei.close, nikkei.change)
+  const analysis = nikkei.analysis
+
+  const driverList = drivers && drivers.length > 0 ? drivers : (analysis?.drivers || [
+    'AI半导体超级周期预期持续升温',
+    '日本本土半导体产业链全面受益',
+    '外资持续净流入日本市场',
+  ])
 
   return (
     <section ref={sectionRef} className="bg-charcoal py-[120px]">
@@ -398,7 +437,7 @@ function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
 
           <div className="animate-item inline-block rounded px-3 py-1" style={{ backgroundColor: trendBgRgba(nikkei.change, 0.15) }}>
             <span className={`font-body text-[0.8125rem] ${trendClass(nikkei.change)}`}>
-              {nikkei.change >= 0 ? '创历史最大单日点数涨幅' : '单日大幅下跌'}
+              {analysis?.comment || (nikkei.change >= 0 ? '市场震荡上行' : '市场承压调整')}
             </span>
           </div>
         </div>
@@ -456,9 +495,9 @@ function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
             </span>
           </div>
           <div className="rounded-xl p-8 border border-dim bg-[rgba(20,20,20,0.4)]">
-            <p className="font-body text-[0.8125rem] text-muted mb-2">历史意义</p>
+            <p className="font-body text-[0.8125rem] text-muted mb-2">市场简评</p>
             <p className="font-body text-[0.9375rem] text-silver leading-relaxed">
-              1987年以来最大单日涨幅
+              {analysis?.subComment || '日经225跟随全球市场波动，半导体产业链仍是核心主线'}
             </p>
           </div>
         </div>
@@ -469,11 +508,7 @@ function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
             关键驱动
           </h4>
           <div className="space-y-4">
-            {[
-              '软银集团暴涨 +18.4%，贡献日经225最大点数涨幅',
-              'AI半导体超级周期预期持续升温',
-              '日本本土半导体产业链全面受益',
-            ].map((text, i) => (
+            {driverList.map((text, i) => (
               <div key={i} className="driver-item flex items-start gap-4">
                 <div className={`w-[2px] h-full min-h-[24px] ${nikkei.change >= 0 ? 'bg-rise-green' : 'bg-fall-red'} rounded-full flex-shrink-0 mt-1`} />
                 <p className="font-body text-[0.9375rem] text-silver leading-relaxed">{text}</p>
@@ -487,7 +522,7 @@ function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
 }
 
 /* ─── Section 4: KOSPI ─── */
-function KOSPISection({ kospi }: { kospi: IndexData }) {
+function KOSPISection({ kospi, background }: { kospi: IndexData; background?: string }) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<HTMLDivElement>(null)
@@ -496,8 +531,6 @@ function KOSPISection({ kospi }: { kospi: IndexData }) {
 
   const closeRef = useRef<HTMLSpanElement>(null)
   const pctRef = useRef<HTMLSpanElement>(null)
-
-  // Counter animations removed - values rendered statically
 
   useGSAP(() => {
     const ctx = gsap.context(() => {
@@ -528,6 +561,10 @@ function KOSPISection({ kospi }: { kospi: IndexData }) {
   }, { scope: sectionRef })
 
   const intraday = kospi.intraday ?? generateChartData(kospi.close, kospi.change)
+  const analysis = kospi.analysis
+  const contributors = analysis?.topContributors || []
+
+  const bgText = background || analysis?.subComment || '韩国股市在半导体双雄的带动下表现活跃，SK海力士凭借在HBM高带宽内存领域的绝对领先地位，持续受益于全球AI算力扩张。'
 
   return (
     <section ref={sectionRef} className="bg-obsidian py-[120px]">
@@ -558,7 +595,7 @@ function KOSPISection({ kospi }: { kospi: IndexData }) {
 
           <div className="animate-item inline-block rounded px-3 py-1" style={{ backgroundColor: trendBgRgba(kospi.change, 0.15) }}>
             <span className={`font-body text-[0.8125rem] ${trendClass(kospi.change)}`}>
-              {kospi.change >= 0 ? '盘中创历史新高' : '盘中大幅波动'}
+              {analysis?.comment || (kospi.change >= 0 ? '市场震荡上行' : '市场承压调整')}
             </span>
           </div>
         </div>
@@ -604,21 +641,21 @@ function KOSPISection({ kospi }: { kospi: IndexData }) {
         {/* Detail grid */}
         <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <div className="rounded-xl p-8 border border-dim bg-[rgba(20,20,20,0.4)]">
-            <p className="font-body text-[0.8125rem] text-light-gold mb-2">历史新高</p>
-            <span className="font-mono text-[2rem] font-normal text-platinum tracking-[-0.02em]">
-              7,531.88
-            </span>
-          </div>
-          <div className="rounded-xl p-8 border border-dim bg-[rgba(20,20,20,0.4)]">
-            <p className="font-body text-[0.8125rem] text-muted mb-2">关键贡献</p>
+            <p className="font-body text-[0.8125rem] text-light-gold mb-2">{contributors[0]?.name || '关键贡献'} {contributors[0]?.changePercent >= 0 ? '+' : ''}{contributors[0]?.changePercent.toFixed(2) ?? ''}% </p>
             <p className="font-body text-[0.9375rem] text-silver leading-relaxed">
-              SK海力士 +3.31%
+              {contributors[0]?.analysis?.[0] || 'SK海力士凭借在HBM高带宽内存领域的领先地位，持续受益于全球AI算力扩张'}
             </p>
           </div>
           <div className="rounded-xl p-8 border border-dim bg-[rgba(20,20,20,0.4)]">
-            <p className="font-body text-[0.8125rem] text-muted mb-2">关键贡献</p>
+            <p className="font-body text-[0.8125rem] text-muted mb-2">{contributors[1]?.name || '关键贡献'} {contributors[1]?.changePercent >= 0 ? '+' : ''}{contributors[1]?.changePercent.toFixed(2) ?? ''}% </p>
             <p className="font-body text-[0.9375rem] text-silver leading-relaxed">
-              三星电子 +2.07%
+              {contributors[1]?.analysis?.[0] || '三星电子在全球存储芯片版图中的地位持续巩固'}
+            </p>
+          </div>
+          <div className="rounded-xl p-8 border border-dim bg-[rgba(20,20,20,0.4)]">
+            <p className="font-body text-[0.8125rem] text-muted mb-2">市场驱动</p>
+            <p className="font-body text-[0.9375rem] text-silver leading-relaxed">
+              {analysis?.drivers?.[0] || '半导体双雄带动大盘，韩国在全球存储芯片版图中的地位持续巩固'}
             </p>
           </div>
         </div>
@@ -629,7 +666,7 @@ function KOSPISection({ kospi }: { kospi: IndexData }) {
             市场背景
           </h4>
           <p className="font-body text-[1.0625rem] text-silver leading-[1.8] max-w-[900px]">
-            韩国股市在半导体双雄的带动下刷新盘中历史新高。SK海力士凭借在HBM高带宽内存领域的绝对领先地位（市占率57-62%），持续受益于全球AI算力扩张。三星电子Q1利润同比暴增756%，市值突破万亿美元大关，进一步巩固了韩国在全球半导体版图中的核心地位。
+            {bgText}
           </p>
         </div>
       </div>
@@ -638,7 +675,7 @@ function KOSPISection({ kospi }: { kospi: IndexData }) {
 }
 
 /* ─── Section 5: Cross-Market Comparison ─── */
-function ComparisonSection({ indices }: { indices: IndexData[] }) {
+function ComparisonSection({ indices, summary }: { indices: IndexData[]; summary?: string }) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
   const chartRef = useRef<HTMLDivElement>(null)
@@ -712,7 +749,7 @@ function ComparisonSection({ indices }: { indices: IndexData[] }) {
         <div ref={quoteRef} className="text-center max-w-[800px] mx-auto">
           <div className="h-[1px] bg-gold w-10 mx-auto mb-6" style={{ opacity: 0.6 }} />
           <p className="font-body text-[1.0625rem] text-silver leading-[1.8] italic mb-6">
-            美股全线收跌与日经/KOSPI 大涨形成鲜明对比，反映全球资本正在重新配置：资金从估值高企的美科技股向受益于AI半导体超级周期的亚洲硬科技产业链转移。
+            {summary || '全球主要市场收盘分化，AI产业链仍是跨市场核心主线。'}
           </p>
           <div className="h-[1px] bg-gold w-10 mx-auto" style={{ opacity: 0.6 }} />
         </div>
@@ -748,11 +785,11 @@ export default function Markets() {
 
   return (
     <div className="bg-obsidian">
-      <HeroSection />
-      <USIndicesSection indices={data.indices} />
-      {nikkei && <NikkeiSection nikkei={nikkei} />}
-      {kospi && <KOSPISection kospi={kospi} />}
-      <ComparisonSection indices={data.indices} />
+      <HeroSection subtitle={data.heroSubtitle} />
+      <USIndicesSection indices={data.indices} descriptions={data.usDescriptions} />
+      {nikkei && <NikkeiSection nikkei={nikkei} drivers={data.nikkeiDrivers} />}
+      {kospi && <KOSPISection kospi={kospi} background={data.kospiBackground} />}
+      <ComparisonSection indices={data.indices} summary={data.crossMarketSummary} />
     </div>
   )
 }

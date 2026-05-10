@@ -9,8 +9,22 @@ import macroBg from '../assets/macro-bg.jpg'
 gsap.registerPlugin(ScrollTrigger)
 
 /* ─── Data Types ─── */
+interface RingNode {
+  label: string
+  sub?: string
+  angle?: number
+  r?: number
+}
+
+interface RingNodes {
+  center: RingNode
+  inner: RingNode[]
+  outer: RingNode[]
+}
+
 interface MacroData {
   lastUpdated: string
+  ringNodes?: RingNodes
   supercycle: {
     arguments: Array<{
       title: string
@@ -94,8 +108,7 @@ function ErrorSection() {
   )
 }
 
-/* ─── Ring Chart Data (static structure) ─── */
-const RING_NODES = {
+const DEFAULT_RING_NODES: RingNodes = {
   center: { label: 'AI芯片', r: 50 },
   inner: [
     { label: '设计', sub: 'NVIDIA / AMD', angle: -90 },
@@ -109,7 +122,8 @@ const RING_NODES = {
   ],
 }
 
-function RingChart() {
+function RingChart({ ringNodes }: { ringNodes?: RingNodes }) {
+  const nodes = ringNodes || DEFAULT_RING_NODES
   const cx = 250
   const cy = 250
   const innerR = 140
@@ -127,9 +141,9 @@ function RingChart() {
       <circle cx={cx} cy={cy} r={outerR} fill="none" stroke="#3A3A3A" strokeWidth="1" strokeDasharray="4 4" opacity="0.4" />
 
       {/* Connecting lines */}
-      {RING_NODES.inner.map((node) => {
-        const p1 = polar(node.angle, RING_NODES.center.r + 4)
-        const p2 = polar(node.angle, innerR - 42)
+      {nodes.inner.map((node) => {
+        const p1 = polar(node.angle ?? 0, nodes.center.r ?? 50 + 4)
+        const p2 = polar(node.angle ?? 0, innerR - 42)
         return (
           <line
             key={`line-inner-${node.label}`}
@@ -143,10 +157,10 @@ function RingChart() {
           />
         )
       })}
-      {RING_NODES.outer.map((node) => {
-        const innerAngle = RING_NODES.inner[0].angle
+      {nodes.outer.map((node) => {
+        const innerAngle = nodes.inner[0]?.angle ?? -90
         const p1 = polar(innerAngle, innerR + 42)
-        const p2 = polar(node.angle, outerR - 40)
+        const p2 = polar(node.angle ?? 0, outerR - 40)
         return (
           <line
             key={`line-outer-${node.label}`}
@@ -162,9 +176,9 @@ function RingChart() {
       })}
 
       {/* Center node */}
-      <circle cx={cx} cy={cy} r={RING_NODES.center.r} fill="#141414" stroke="#C9A962" strokeWidth="2" />
+      <circle cx={cx} cy={cy} r={nodes.center.r ?? 50} fill="#141414" stroke="#C9A962" strokeWidth="2" />
       <text x={cx} y={cy - 6} textAnchor="middle" fill="#C9A962" fontSize="14" fontFamily="'Noto Sans SC', sans-serif" fontWeight="500">
-        AI芯片
+        {nodes.center.label}
       </text>
       <circle cx={cx} cy={cy} r={4} fill="#C9A962">
         <animate attributeName="r" values="4;6;4" dur="3s" repeatCount="indefinite" />
@@ -172,8 +186,8 @@ function RingChart() {
       </circle>
 
       {/* Inner ring nodes */}
-      {RING_NODES.inner.map((node) => {
-        const p = polar(node.angle, innerR)
+      {nodes.inner.map((node) => {
+        const p = polar(node.angle ?? 0, innerR)
         return (
           <g key={`inner-${node.label}`} className="group cursor-pointer">
             <circle cx={p.x} cy={p.y} r={42} fill="#141414" stroke="#C9A962" strokeWidth="1.5" opacity="0.8" className="transition-all duration-300 group-hover:opacity-100 group-hover:stroke-[#E8D5A3]" />
@@ -184,8 +198,8 @@ function RingChart() {
       })}
 
       {/* Outer ring nodes */}
-      {RING_NODES.outer.map((node) => {
-        const p = polar(node.angle, outerR)
+      {nodes.outer.map((node) => {
+        const p = polar(node.angle ?? 0, outerR)
         return (
           <g key={`outer-${node.label}`} className="group cursor-pointer">
             <circle cx={p.x} cy={p.y} r={40} fill="#141414" stroke="#B0B0B0" strokeWidth="1" opacity="0.7" className="transition-all duration-300 group-hover:opacity-100 group-hover:stroke-[#C9A962]" />
