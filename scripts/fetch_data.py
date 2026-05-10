@@ -529,6 +529,329 @@ def get_macro_data(indices_data: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Chain Analysis (news-driven dynamic descriptions)
+# ---------------------------------------------------------------------------
+
+CHAIN_LAYER_CONFIG: List[Dict[str, Any]] = [
+    {
+        "id": "01",
+        "title": "芯片设计",
+        "short": "设计",
+        "symbols": ["NVDA", "AMD"],
+        "companies": [
+            {"name": "NVIDIA", "label": "AI计算霸主", "highlight": True},
+            {"name": "AMD", "label": "追赶者", "highlight": False},
+        ],
+        "marketSize": "AI芯片市场: 1,800亿美元",
+        "templates": {
+            "up": [
+                "NVIDIA凭借Blackwell架构和CUDA生态持续巩固AI训练市场主导地位，AMD通过MI350系列在推理市场取得突破。最新新闻显示AI芯片需求持续强劲，设计层景气度维持高位。",
+                "云厂商数据中心扩张拉动高端GPU需求，NVIDIA和AMD订单排产至2027年。新闻提及AI芯片瓶颈仍是市场关注焦点，设计层成为产业链最确定的受益环节。",
+                "AI推理需求爆发式增长，NVIDIA在数据中心GPU领域保持绝对领先，AMD MI350系列获得云厂商大量订单。设计层技术创新速度正在加快。",
+            ],
+            "down": [
+                "市场对AI芯片需求增速放缓的担忧升温，部分投资者担心数据中心资本开支周期见顶。NVIDIA和AMD股价高位回调，设计层短期承压。",
+                "下游客户库存调整导致高端GPU订单增速放缓，NVIDIA和AMD面临季节性需求波动。设计层进入阶段性整理。",
+            ],
+            "neutral": [
+                "AI芯片市场进入季节性调整期，NVIDIA和AMD股价高位震荡。新闻显示市场对下一代产品发布充满期待，设计层等待新催化。",
+                "芯片设计层竞争格局稳定，NVIDIA维持CUDA生态优势，AMD在推理市场稳步推进。行业关注焦点转向下一代架构的能效比提升。",
+            ],
+        },
+        "keywords": ["AI chip", "Blackwell", "CUDA", "inference", "training", "GPU", "data center", "Nvidia", "AMD"],
+    },
+    {
+        "id": "02",
+        "title": "HBM存储",
+        "short": "存储",
+        "symbols": ["000660.KS", "005930.KS", "MU"],
+        "companies": [
+            {"name": "SK海力士", "label": "市占率57-62%", "highlight": True},
+            {"name": "三星电子", "label": "追赶者", "highlight": False},
+            {"name": "美光", "label": "~10%", "highlight": False},
+        ],
+        "stats": [
+            {"value": "57-62%", "label": "SK海力士市占率"},
+            {"value": "79%", "label": "SK海力士毛利率"},
+        ],
+        "templates": {
+            "up": [
+                "HBM供应持续紧张，SK海力士凭借与NVIDIA的深度绑定维持技术领先。最新新闻显示AI内存价格持续上行，HBM3E和即将量产的HBM4推动存储厂商毛利率扩张，存储层成为AI产业链的瓶颈与价值核心。",
+                "AI boom驱动存储芯片需求激增，SK海力士和三星加速HBM产能扩张。新闻提及memory price surge，存储层景气度处于历史高位。",
+                "HBM技术迭代加速，从HBM2E到HBM3E再到HBM4，每一代堆叠层数翻倍。SK海力士率先量产能力建立了难以逾越的技术护城河，三星正全力追赶。",
+            ],
+            "down": [
+                "存储芯片价格回落担忧浮现，部分下游客户库存调整导致HBM订单增速放缓。SK海力士和三星面临短期需求波动，存储层承压。",
+                "市场对HBM产能过剩的担忧升温，三星大幅扩产可能改变供需格局。存储层进入价格博弈期，SK海力士毛利率面临压缩压力。",
+            ],
+            "neutral": [
+                "HBM市场供需趋于平衡，SK海力士与三星竞争加剧。新闻显示memory市场进入平稳期，等待HBM4量产带来新一轮增长。",
+                "存储层技术迭代持续推进，SK海力士维持高市占率，三星加速追赶。行业关注焦点转向HBM4的量产进度和产能爬坡。",
+            ],
+        },
+        "keywords": ["HBM", "memory", "supply", "shortage", "price", "DDR", "SK Hynix", "Samsung", "Micron", "storage"],
+    },
+    {
+        "id": "03",
+        "title": "半导体设备",
+        "short": "设备",
+        "symbols": ["8035.T", "6857.T", "ASML", "AMAT"],
+        "companies": [
+            {"name": "东京电子", "label": "刻蚀龙头", "highlight": True},
+            {"name": "爱德万测试", "label": "测试核心", "highlight": True},
+            {"name": "ASML", "label": "光刻垄断", "highlight": False},
+            {"name": "Applied Materials", "label": "沉积巨头", "highlight": False},
+        ],
+        "stats": [
+            {"value": "#1", "label": "东京电子刻蚀市占率"},
+            {"value": "#1", "label": "爱德万SoC测试市占率"},
+        ],
+        "templates": {
+            "up": [
+                "晶圆厂扩产周期持续，东京电子和爱德万测试订单创历史新高。最新新闻显示AI芯片产能扩张拉动设备投资，设备层是AI芯片量产的前提条件。",
+                "先进制程复杂度提升驱动设备需求，KLA和东京电子在检测与刻蚀领域持续 gain share。每一座先进制程晶圆厂需要投资150-200亿美元设备，设备商技术壁垒进一步巩固。",
+                "ASML先进光刻机交付加速，推动3nm及以下制程产能爬坡。设备层迎来扩产与升级双重驱动，东京电子和爱德万是最确定的受益者。",
+            ],
+            "down": [
+                "晶圆厂资本开支预期下调，设备交付周期缩短，设备层订单增速面临放缓压力。东京电子和爱德万测试短期承压。",
+                "存储厂商减产影响设备需求，部分晶圆厂推迟扩产计划。设备层进入周期性调整，等待下一轮资本开支周期。",
+            ],
+            "neutral": [
+                "半导体设备行业进入平稳增长期，东京电子和爱德万维持高市占率。新闻显示设备市场供需平衡，等待下一轮扩产周期启动。",
+                "设备层技术升级持续推进，从刻蚀到测试各环节都在迎接AI芯片带来的新挑战。行业关注焦点转向先进封装设备的增量需求。",
+            ],
+        },
+        "keywords": ["equipment", "etch", "test", "lithography", "deposition", "fab", "expansion", "Tokyo Electron", "Advantest", "ASML"],
+    },
+    {
+        "id": "04",
+        "title": "晶圆代工",
+        "short": "代工",
+        "symbols": ["TSM", "INTC"],
+        "companies": [
+            {"name": "台积电", "label": "先进制程垄断", "highlight": False},
+            {"name": "三星代工", "label": "追赶者", "highlight": False},
+            {"name": "Intel Foundry", "label": "破局者", "highlight": False},
+        ],
+        "templates": {
+            "up": [
+                "台积电3nm产能满载，先进制程需求强劲。最新新闻显示foundry市场供不应求，晶圆代工层成为芯片从设计到物理实现的关键桥梁。",
+                "三星3nm GAA工艺取得突破，试图打破台积电垄断。晶圆代工层竞争格局出现新变数，技术创新正在加速。",
+                "AI芯片对先进制程的需求爆发，台积电和三星代工订单排产至2027年。晶圆厂的产能利用率直接决定设备需求和材料消耗。",
+            ],
+            "down": [
+                "晶圆厂产能利用率下滑，成熟制程价格战压缩毛利率。代工层短期承压，台积电和三星面临需求波动。",
+                "部分AI芯片客户推迟流片计划，晶圆代工层订单增速放缓。成熟制程产能过剩问题凸显，代工层进入调整期。",
+            ],
+            "neutral": [
+                "先进制程与成熟制程分化加剧，台积电维持技术领先，三星和Intel Foundry追赶中。代工层等待AI芯片需求的新一轮释放。",
+                "晶圆代工层竞争格局稳定，台积电占据全球先进代工90%份额。行业关注焦点转向2nm工艺的量产进度和成本结构。",
+            ],
+        },
+        "keywords": ["foundry", "3nm", "capacity", "utilization", "advanced process", "GAA", "TSMC", "Intel", "Samsung"],
+    },
+    {
+        "id": "05",
+        "title": "云服务商",
+        "short": "云服务",
+        "symbols": ["MSFT", "AMZN", "GOOGL", "META"],
+        "companies": [
+            {"name": "微软 Azure", "label": "最大买家", "highlight": True},
+            {"name": "亚马逊 AWS", "label": "自研芯片", "highlight": False},
+            {"name": "谷歌 GCP", "label": "TPU生态", "highlight": False},
+            {"name": "Meta", "label": "AI算力中心", "highlight": False},
+        ],
+        "bigNumber": {"value": "8,300亿", "label": "美元资本支出"},
+        "templates": {
+            "up": [
+                "云厂商资本支出维持高位，微软Azure、亚马逊AWS、谷歌GCP三家主导全球云市场。最新新闻显示AI基础设施投资竞赛白热化，云服务层是产业链的终端买单方。",
+                "云厂商自建AI算力中心拉动上游需求，微软与OpenAI深度合作，亚马逊加速自研芯片布局。云服务层景气度处于历史高位，资本支出决定全产业链需求强度。",
+                "全球CSP资本支出创历史纪录，云服务商的巨额投资正在创造半导体行业历史上最大的需求浪潮。微软、谷歌、亚马逊三强格局稳固。",
+            ],
+            "down": [
+                "云业务增速放缓担忧升温，部分投资者担忧AI投资回报周期过长。云厂商资本开支面临收缩压力，上游产业链受牵连。",
+                "宏观经济下行影响企业IT支出，云厂商营收增速回落。资本开支计划面临调整，云服务层短期承压。",
+            ],
+            "neutral": [
+                "云市场进入平稳增长期，AI业务收入占比提升但增速回落。云服务层等待杀手级AI应用爆发，带动新一轮资本开支周期。",
+                "云厂商竞争格局稳定，微软Azure领先，AWS和GCP紧随其后。行业关注焦点从基础设施投资转向AI应用的商业化落地。",
+            ],
+        },
+        "keywords": ["capex", "cloud", "Azure", "AWS", "GCP", "AI infrastructure", "data center", "Microsoft", "Amazon", "Google"],
+    },
+]
+
+INVESTMENT_TEMPLATES = {
+    "up": [
+        "软银集团作为产业链的投资层，通过愿景基金持有全球AI生态的关键节点：OpenAI（生成式AI）、Arm（芯片架构）、波士顿动力（机器人）、以及数十家AI初创企业。当日日经225上涨，市场对这种'全栈AI投资'模式的认可度持续强化。",
+        "软银愿景基金核心持仓估值修复，OpenAI和Arm成为投资组合的重要支柱。当日市场表现积极，投资层捕获AI全链条价值的逻辑得到验证。",
+    ],
+    "down": [
+        "软银集团作为产业链的投资层，通过愿景基金持有全球AI生态的关键节点：OpenAI（生成式AI）、Arm（芯片架构）、波士顿动力（机器人）、以及数十家AI初创企业。当日日经225调整，愿景基金部分投资组合面临估值压力。",
+        "软银投资组合进入阶段性整理，科技股估值压缩影响投资收益。但中长期来看，OpenAI和Arm仍是AI生态中最具价值的资产。",
+    ],
+    "neutral": [
+        "软银集团作为产业链的投资层，通过愿景基金持有全球AI生态的关键节点：OpenAI（生成式AI）、Arm（芯片架构）、波士顿动力（机器人）、以及数十家AI初创企业。它不直接参与任何一层的产品竞争，却在每一层都有战略投资布局。",
+        "软银投资组合进入价值兑现期，OpenAI和Arm的估值变化成为关键催化剂。市场对'全栈AI投资'模式的认可度保持稳定。",
+    ],
+}
+
+
+def fetch_company_news(symbols: List[str], max_age_hours: int = 48) -> List[Dict[str, str]]:
+    """Fetch recent news headlines for a list of stock symbols via yfinance."""
+    import yfinance as yf
+    all_news: List[Dict[str, str]] = []
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=max_age_hours)
+
+    for symbol in symbols:
+        try:
+            ticker = yf.Ticker(symbol)
+            news = ticker.news or []
+            for item in news:
+                content = item.get("content", {})
+                title = content.get("title", "")
+                summary = content.get("summary", "")
+                pub_str = content.get("pubDate", "")
+                if not title:
+                    continue
+                try:
+                    pub_dt = datetime.fromisoformat(pub_str.replace("Z", "+00:00"))
+                except Exception:
+                    pub_dt = datetime.now(timezone.utc)
+                if pub_dt >= cutoff:
+                    all_news.append({
+                        "symbol": symbol,
+                        "title": title,
+                        "summary": summary,
+                        "pubDate": pub_str,
+                    })
+        except Exception as e:
+            logger.warning(f"News fetch failed for {symbol}: {e}")
+
+    # Deduplicate by title
+    seen = set()
+    deduped = []
+    for n in all_news:
+        if n["title"] not in seen:
+            seen.add(n["title"])
+            deduped.append(n)
+
+    return deduped
+
+
+def analyze_layer_news(layer: Dict[str, Any], news_items: List[Dict[str, str]], index_change: float) -> str:
+    """Pick the best description template based on news keywords and market direction."""
+    direction = "up" if index_change >= 0.5 else "down" if index_change <= -0.5 else "neutral"
+    templates = layer["templates"].get(direction, layer["templates"]["neutral"])
+    keywords = [k.lower() for k in layer.get("keywords", [])]
+
+    if not news_items or not keywords:
+        return templates[0]
+
+    # Score each template by keyword matches in news titles/summaries
+    best_score = -1
+    best_template = templates[0]
+    all_text = " ".join([(n["title"] + " " + n["summary"]) for n in news_items]).lower()
+
+    for tmpl in templates:
+        score = sum(1 for kw in keywords if kw.lower() in all_text)
+        if score > best_score:
+            best_score = score
+            best_template = tmpl
+
+    return best_template
+
+
+def get_chain_data(indices_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Generate dynamic chain data with news-driven descriptions."""
+    index_map = {idx["symbol"]: idx for idx in indices_data}
+    nikkei = index_map.get("^N225", {})
+    nikkei_change = nikkei.get("changePercent", 0)
+
+    layers = []
+    for layer_cfg in CHAIN_LAYER_CONFIG:
+        symbols = layer_cfg["symbols"]
+        news = fetch_company_news(symbols, max_age_hours=72)
+        logger.info(f"  Layer '{layer_cfg['title']}': fetched {len(news)} news items")
+
+        # Determine direction from related index (US indices for design/cloud, N225 for equipment, KS11 for memory)
+        related_change = 0.0
+        if any(s in ["NVDA", "AMD", "MSFT", "AMZN", "GOOGL", "META"] for s in symbols):
+            us = [index_map.get("^DJI", {}), index_map.get("^GSPC", {}), index_map.get("^IXIC", {})]
+            related_change = sum(i.get("changePercent", 0) for i in us) / len(us) if us else 0
+        elif any(s in ["8035.T", "6857.T", "ASML"] for s in symbols):
+            related_change = nikkei_change
+        elif any(s in ["000660.KS", "005930.KS"] for s in symbols):
+            related_change = index_map.get("^KS11", {}).get("changePercent", 0)
+        else:
+            related_change = nikkei_change
+
+        desc = analyze_layer_news(layer_cfg, news, related_change)
+
+        layer_out: Dict[str, Any] = {
+            "id": layer_cfg["id"],
+            "title": layer_cfg["title"],
+            "short": layer_cfg["short"],
+            "companies": layer_cfg["companies"],
+            "desc": desc,
+            "bg": "obsidian" if int(layer_cfg["id"]) % 2 == 1 else "charcoal",
+            "layout": "data-left" if int(layer_cfg["id"]) % 2 == 1 else "mirror",
+        }
+        if "marketSize" in layer_cfg:
+            layer_out["marketSize"] = layer_cfg["marketSize"]
+        if "stats" in layer_cfg:
+            layer_out["stats"] = layer_cfg["stats"]
+        if "bigNumber" in layer_cfg:
+            layer_out["bigNumber"] = layer_cfg["bigNumber"]
+
+        layers.append(layer_out)
+
+    # Investment layer direction based on Nikkei
+    inv_direction = "up" if nikkei_change >= 0.5 else "down" if nikkei_change <= -0.5 else "neutral"
+    inv_templates = INVESTMENT_TEMPLATES.get(inv_direction, INVESTMENT_TEMPLATES["neutral"])
+
+    # Fetch SoftBank news for investment layer
+    sb_news = fetch_company_news(["9984.T"], max_age_hours=72)
+    inv_desc = inv_templates[0]
+    if sb_news:
+        sb_text = " ".join([(n["title"] + " " + n["summary"]) for n in sb_news]).lower()
+        sb_keywords = ["softbank", "vision fund", "openai", "arm", "investment"]
+        best_score = -1
+        for tmpl in inv_templates:
+            score = sum(1 for kw in sb_keywords if kw in sb_text)
+            if score > best_score:
+                best_score = score
+                inv_desc = tmpl
+
+    investment = {
+        "title": "投资层: 软银集团",
+        "desc": inv_desc,
+        "portfolio": [
+            {"name": "OpenAI", "role": "生成式AI"},
+            {"name": "Arm", "role": "芯片架构"},
+            {"name": "波士顿动力", "role": "机器人"},
+            {"name": "其他AI投资", "role": "初创组合"},
+        ],
+    }
+
+    # Dynamic summary
+    us_avg = sum(index_map.get(s, {}).get("changePercent", 0) for s in ["^DJI", "^GSPC", "^IXIC"]) / 3
+    if us_avg >= 0.5 and nikkei_change >= 0.5:
+        summary = f"全球AI半导体产业链全线走强：云服务商资本支出驱动芯片设计订单爆发，HBM存储和半导体设备紧随其后。当前美股平均上涨{us_avg:+.2f}%，日经225上涨{nikkei_change:+.2f}%，软银集团作为投资层捕获全产业链价值。"
+    elif us_avg <= -0.5 and nikkei_change <= -0.5:
+        summary = f"全球AI半导体产业链同步调整：市场对资本开支周期见顶的担忧升温，各环节面临获利回吐压力。当前美股平均调整{abs(us_avg):.2f}%，日经225调整{abs(nikkei_change):.2f}%，建议关注回调后的布局机会。"
+    else:
+        summary = f"全球AI半导体产业链分化运行：美股平均{us_avg:+.2f}%，日经225{nikkei_change:+.2f}%。云服务商资本支出仍是产业链核心驱动力，设备商和存储商景气度保持韧性，软银集团投资层横跨整个链条捕获价值。"
+
+    return {
+        "lastUpdated": now_shanghai(),
+        "layers": layers,
+        "investment": investment,
+        "summary": summary,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 def main():
@@ -572,9 +895,22 @@ def main():
         logger.error(f"Error building macro data: {e}")
         macro_data = {"lastUpdated": ts, "summary": "数据生成中", "factors": [], "cspCapex": [], "keyEvents": []}
 
-    # --- 4. Build meta ---
-    next_update = (datetime.now(timezone(timedelta(hours=8))) + timedelta(days=1)).strftime(
-        "%Y-%m-%dT07:00:00+08:00"
+    # --- 4. Build chain data (news-driven dynamic descriptions) ---
+    try:
+        chain_data = get_chain_data(indices_data)
+        logger.info("Built chain data with news-driven descriptions")
+    except Exception as e:
+        logger.error(f"Error building chain data: {e}")
+        chain_data = {
+            "lastUpdated": ts,
+            "layers": [],
+            "investment": {"title": "投资层: 软银集团", "desc": "数据生成中...", "portfolio": []},
+            "summary": "数据生成中",
+        }
+
+    # --- 5. Build meta ---
+    next_update = (datetime.now(timezone(timedelta(hours=8))) + timedelta(hours=2)).strftime(
+        "%Y-%m-%dT%H:%M:%S+08:00"
     )
     meta = {
         "lastUpdated": ts,
@@ -588,6 +924,7 @@ def main():
         write_json(os.path.join(OUTPUT_DIR, "market-data.json"), market_data)
         write_json(os.path.join(OUTPUT_DIR, "leaders-data.json"), leaders_data)
         write_json(os.path.join(OUTPUT_DIR, "macro-data.json"), macro_data)
+        write_json(os.path.join(OUTPUT_DIR, "chain-data.json"), chain_data)
         write_json(os.path.join(OUTPUT_DIR, "meta.json"), meta)
         logger.info("=== All files written successfully ===")
     except Exception as e:

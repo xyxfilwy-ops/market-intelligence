@@ -1,0 +1,183 @@
+{
+  "lastUpdated": "2026-05-11T05:57:07+08:00",
+  "layers": [
+    {
+      "id": "01",
+      "title": "芯片设计",
+      "short": "设计",
+      "companies": [
+        {
+          "name": "NVIDIA",
+          "label": "AI计算霸主",
+          "highlight": true
+        },
+        {
+          "name": "AMD",
+          "label": "追赶者",
+          "highlight": false
+        }
+      ],
+      "desc": "NVIDIA凭借Blackwell架构和CUDA生态持续巩固AI训练市场主导地位，AMD通过MI350系列在推理市场取得突破。最新新闻显示AI芯片需求持续强劲，设计层景气度维持高位。",
+      "bg": "obsidian",
+      "layout": "data-left",
+      "marketSize": "AI芯片市场: 1,800亿美元"
+    },
+    {
+      "id": "02",
+      "title": "HBM存储",
+      "short": "存储",
+      "companies": [
+        {
+          "name": "SK海力士",
+          "label": "市占率57-62%",
+          "highlight": true
+        },
+        {
+          "name": "三星电子",
+          "label": "追赶者",
+          "highlight": false
+        },
+        {
+          "name": "美光",
+          "label": "~10%",
+          "highlight": false
+        }
+      ],
+      "desc": "HBM市场供需趋于平衡，SK海力士与三星竞争加剧。新闻显示memory市场进入平稳期，等待HBM4量产带来新一轮增长。",
+      "bg": "charcoal",
+      "layout": "mirror",
+      "stats": [
+        {
+          "value": "57-62%",
+          "label": "SK海力士市占率"
+        },
+        {
+          "value": "79%",
+          "label": "SK海力士毛利率"
+        }
+      ]
+    },
+    {
+      "id": "03",
+      "title": "半导体设备",
+      "short": "设备",
+      "companies": [
+        {
+          "name": "东京电子",
+          "label": "刻蚀龙头",
+          "highlight": true
+        },
+        {
+          "name": "爱德万测试",
+          "label": "测试核心",
+          "highlight": true
+        },
+        {
+          "name": "ASML",
+          "label": "光刻垄断",
+          "highlight": false
+        },
+        {
+          "name": "Applied Materials",
+          "label": "沉积巨头",
+          "highlight": false
+        }
+      ],
+      "desc": "半导体设备行业进入平稳增长期，东京电子和爱德万维持高市占率。新闻显示设备市场供需平衡，等待下一轮扩产周期启动。",
+      "bg": "obsidian",
+      "layout": "data-left",
+      "stats": [
+        {
+          "value": "#1",
+          "label": "东京电子刻蚀市占率"
+        },
+        {
+          "value": "#1",
+          "label": "爱德万SoC测试市占率"
+        }
+      ]
+    },
+    {
+      "id": "04",
+      "title": "晶圆代工",
+      "short": "代工",
+      "companies": [
+        {
+          "name": "台积电",
+          "label": "先进制程垄断",
+          "highlight": false
+        },
+        {
+          "name": "三星代工",
+          "label": "追赶者",
+          "highlight": false
+        },
+        {
+          "name": "Intel Foundry",
+          "label": "破局者",
+          "highlight": false
+        }
+      ],
+      "desc": "先进制程与成熟制程分化加剧，台积电维持技术领先，三星和Intel Foundry追赶中。代工层等待AI芯片需求的新一轮释放。",
+      "bg": "charcoal",
+      "layout": "mirror"
+    },
+    {
+      "id": "05",
+      "title": "云服务商",
+      "short": "云服务",
+      "companies": [
+        {
+          "name": "微软 Azure",
+          "label": "最大买家",
+          "highlight": true
+        },
+        {
+          "name": "亚马逊 AWS",
+          "label": "自研芯片",
+          "highlight": false
+        },
+        {
+          "name": "谷歌 GCP",
+          "label": "TPU生态",
+          "highlight": false
+        },
+        {
+          "name": "Meta",
+          "label": "AI算力中心",
+          "highlight": false
+        }
+      ],
+      "desc": "云厂商资本支出维持高位，微软Azure、亚马逊AWS、谷歌GCP三家主导全球云市场。最新新闻显示AI基础设施投资竞赛白热化，云服务层是产业链的终端买单方。",
+      "bg": "obsidian",
+      "layout": "data-left",
+      "bigNumber": {
+        "value": "8,300亿",
+        "label": "美元资本支出"
+      }
+    }
+  ],
+  "investment": {
+    "title": "投资层: 软银集团",
+    "desc": "软银集团作为产业链的投资层，通过愿景基金持有全球AI生态的关键节点：OpenAI（生成式AI）、Arm（芯片架构）、波士顿动力（机器人）、以及数十家AI初创企业。它不直接参与任何一层的产品竞争，却在每一层都有战略投资布局。",
+    "portfolio": [
+      {
+        "name": "OpenAI",
+        "role": "生成式AI"
+      },
+      {
+        "name": "Arm",
+        "role": "芯片架构"
+      },
+      {
+        "name": "波士顿动力",
+        "role": "机器人"
+      },
+      {
+        "name": "其他AI投资",
+        "role": "初创组合"
+      }
+    ]
+  },
+  "summary": "全球AI半导体产业链分化运行：美股平均+0.86%，日经225-0.19%。云服务商资本支出仍是产业链核心驱动力，设备商和存储商景气度保持韧性，软银集团投资层横跨整个链条捕获价值。"
+}

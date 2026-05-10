@@ -7,7 +7,45 @@ import chipBg from '../assets/chip-abstract.jpg'
 
 gsap.registerPlugin(ScrollTrigger)
 
-/* ─── Data Loading Hook ─── */
+/* ─── Types ─── */
+interface ChainCompany {
+  name: string
+  label: string
+  highlight: boolean
+}
+
+interface ChainStat {
+  value: string
+  label: string
+}
+
+interface ChainLayer {
+  id: string
+  title: string
+  short: string
+  companies: ChainCompany[]
+  desc: string
+  bg: string
+  layout: string
+  marketSize?: string
+  bigNumber?: { value: string; label: string }
+  stats?: ChainStat[]
+}
+
+interface ChainInvestment {
+  title: string
+  desc: string
+  portfolio: { name: string; role: string }[]
+}
+
+interface ChainData {
+  lastUpdated: string
+  layers: ChainLayer[]
+  investment: ChainInvestment
+  summary: string
+}
+
+/* ─── Data Loading Hooks ─── */
 function useMarketData() {
   const [data, setData] = useState<{ lastUpdated: string; indices: Array<{ symbol: string; name: string; changePercent: number; region: string }> } | null>(null)
 
@@ -21,100 +59,25 @@ function useMarketData() {
   return data
 }
 
-const LAYERS = [
-  {
-    id: '01',
-    title: '芯片设计',
-    short: '设计',
-    companies: [
-      { name: 'NVIDIA', label: 'AI计算霸主', highlight: true },
-      { name: 'AMD', label: '追赶者', highlight: false },
-    ],
-    marketSize: 'AI芯片市场: 1,800亿美元',
-    desc: '芯片设计是AI产业链的顶层，决定算力上限。NVIDIA凭借CUDA生态和Blackwell架构垄断AI训练市场90%份额。AMD通过MI350系列追赶，在推理市场取得突破。',
-    bg: 'obsidian',
-    layout: 'data-left' as const,
-  },
-  {
-    id: '02',
-    title: 'HBM存储',
-    short: '存储',
-    companies: [
-      { name: 'SK海力士', label: '市占率57-62%', highlight: true },
-      { name: '三星电子', label: '追赶者', highlight: false },
-      { name: '美光', label: '~10%', highlight: false },
-    ],
-    stats: [
-      { value: '57-62%', label: 'SK海力士市占率' },
-      { value: '79%', label: 'SK海力士毛利率' },
-    ],
-    desc: 'HBM（High Bandwidth Memory）是AI芯片的性能瓶颈与核心瓶颈。从HBM2E到HBM3E再到HBM4，每一代堆叠层数翻倍，带宽提升40%以上。SK海力士凭借与NVIDIA的深度绑定和率先量产能力，建立了难以逾越的技术护城河。',
-    bg: 'charcoal',
-    layout: 'mirror' as const,
-  },
-  {
-    id: '03',
-    title: '半导体设备',
-    short: '设备',
-    companies: [
-      { name: '东京电子', label: '刻蚀龙头', highlight: true },
-      { name: '爱德万测试', label: '测试核心', highlight: true },
-      { name: 'ASML', label: '光刻垄断', highlight: false },
-      { name: 'Applied Materials', label: '沉积巨头', highlight: false },
-    ],
-    stats: [
-      { value: '#1', label: '东京电子刻蚀市占率' },
-      { value: '#1', label: '爱德万SoC测试市占率' },
-    ],
-    desc: '半导体设备是晶圆厂扩产的前提条件。每一座先进制程晶圆厂需要投资150-200亿美元设备。东京电子在刻蚀和沉积设备领域占据全球第一，爱德万测试是SoC测试设备的绝对龙头，两家公司合计贡献日经225当日涨幅的相当一部分。',
-    bg: 'obsidian',
-    layout: 'data-left' as const,
-  },
-  {
-    id: '04',
-    title: '晶圆代工',
-    short: '代工',
-    companies: [
-      { name: '台积电', label: '先进制程垄断', highlight: false },
-      { name: '三星代工', label: '追赶者', highlight: false },
-      { name: 'Intel Foundry', label: '破局者', highlight: false },
-    ],
-    desc: '晶圆代工是芯片从设计到物理实现的桥梁。台积电以3nm工艺领先，占据全球先进代工90%份额。三星代工在3nm GAA工艺上取得突破，试图打破台积电垄断。晶圆厂的产能利用率直接决定设备需求和材料消耗。',
-    bg: 'charcoal',
-    layout: 'mirror' as const,
-  },
-  {
-    id: '05',
-    title: '云服务商',
-    short: '云服务',
-    companies: [
-      { name: '微软 Azure', label: '最大买家', highlight: true },
-      { name: '亚马逊 AWS', label: '自研芯片', highlight: false },
-      { name: '谷歌 GCP', label: 'TPU生态', highlight: false },
-      { name: 'Meta', label: 'AI算力中心', highlight: false },
-    ],
-    bigNumber: { value: '8,300亿', label: '美元资本支出' },
-    desc: '云服务商是整个产业链的终端买单方。微软Azure、亚马逊AWS、谷歌GCP三家合计占据全球云市场60%份额，它们的资本支出决定上游所有环节的需求强度。2026年8,300亿美元的AI基建投资，正在创造半导体行业历史上最大的需求浪潮。',
-    bg: 'obsidian',
-    layout: 'data-left' as const,
-  },
-]
+function useChainData() {
+  const [data, setData] = useState<ChainData | null>(null)
 
-function getInvestmentDesc(nikkeiChange: number | undefined): string {
-  const trend = nikkeiChange !== undefined
-    ? (nikkeiChange >= 0 ? `当日日经225上涨${nikkeiChange.toFixed(2)}%，` : `当日日经225调整${Math.abs(nikkeiChange).toFixed(2)}%，`)
-    : ''
-  return `软银集团作为产业链的投资层，通过愿景基金持有全球AI生态的关键节点：OpenAI（生成式AI）、Arm（芯片架构）、波士顿动力（机器人）、以及数十家AI初创企业。它不直接参与任何一层的产品竞争，却在每一层都有战略投资布局。${trend}市场对这种"全栈AI投资"模式的认可持续强化。`
+  useEffect(() => {
+    fetch('./data/chain-data.json')
+      .then(r => r.json())
+      .then(d => setData(d))
+      .catch(() => setData(null))
+  }, [])
+
+  return data
 }
 
-const INVESTMENT = {
-  title: '投资层: 软银集团',
-  portfolio: [
-    { name: 'OpenAI', role: '生成式AI' },
-    { name: 'Arm', role: '芯片架构' },
-    { name: '波士顿动力', role: '机器人' },
-    { name: '其他AI投资', role: '初创组合' },
-  ],
+function buildInvestmentDesc(baseDesc: string, nikkeiChange: number | undefined): string {
+  if (nikkeiChange === undefined) return baseDesc
+  const trend = nikkeiChange >= 0
+    ? `当日日经225上涨${nikkeiChange.toFixed(2)}%，市场对这种"全栈AI投资"模式的认可持续强化。`
+    : `当日日经225调整${Math.abs(nikkeiChange).toFixed(2)}%，市场对这种"全栈AI投资"模式保持审慎乐观。`
+  return `${baseDesc}${trend}`
 }
 
 function ChipIcon() {
@@ -164,7 +127,7 @@ function CloudIcon() {
 
 const ICONS = [ChipIcon, MemoryIcon, GearIcon, FactoryIcon, CloudIcon]
 
-function DesktopDiagram({ onNodeClick }: { onNodeClick: (id: string) => void }) {
+function DesktopDiagram({ layers, onNodeClick }: { layers: ChainLayer[]; onNodeClick: (id: string) => void }) {
   const nodeX = [130, 380, 630, 880, 1130]
   const nodeY = 340
   const investX = 630
@@ -213,7 +176,7 @@ function DesktopDiagram({ onNodeClick }: { onNodeClick: (id: string) => void }) 
       ))}
 
       {/* Main nodes */}
-      {LAYERS.map((layer, i) => {
+      {layers.map((layer, i) => {
         const x = nodeX[i]
         const Icon = ICONS[i]
         return (
@@ -303,10 +266,10 @@ function DesktopDiagram({ onNodeClick }: { onNodeClick: (id: string) => void }) 
   )
 }
 
-function MobileChain({ onNodeClick }: { onNodeClick: (id: string) => void }) {
+function MobileChain({ layers, onNodeClick }: { layers: ChainLayer[]; onNodeClick: (id: string) => void }) {
   return (
     <div className="flex flex-col gap-6 lg:hidden">
-      {LAYERS.map((layer, i) => {
+      {layers.map((layer, i) => {
         const Icon = ICONS[i]
         return (
           <div key={layer.id} className="relative">
@@ -356,7 +319,7 @@ function MobileChain({ onNodeClick }: { onNodeClick: (id: string) => void }) {
   )
 }
 
-function InvestmentStar() {
+function InvestmentStar({ portfolio }: { portfolio: { name: string; role: string }[] }) {
   const cx = 200
   const cy = 150
   const radius = 100
@@ -384,7 +347,7 @@ function InvestmentStar() {
       })}
 
       {/* Radiating nodes */}
-      {INVESTMENT.portfolio.map((item, i) => {
+      {portfolio.map((item, i) => {
         const angle = angles[i]
         const x = cx + radius * Math.cos((angle * Math.PI) / 180)
         const y = cy + radius * Math.sin((angle * Math.PI) / 180)
@@ -416,11 +379,17 @@ function InvestmentStar() {
 export default function Chain() {
   const containerRef = useRef<HTMLDivElement>(null)
   const marketData = useMarketData()
+  const chainData = useChainData()
   const nikkei = marketData?.indices.find(i => i.symbol === '^N225')
-  const investmentDesc = getInvestmentDesc(nikkei?.changePercent)
-  const chainSummary = nikkei
+  const layers = chainData?.layers ?? []
+  const investment = chainData?.investment
+  const investmentDesc = buildInvestmentDesc(
+    investment?.desc ?? '软银集团作为产业链的投资层，通过愿景基金持有全球AI生态的关键节点：OpenAI（生成式AI）、Arm（芯片架构）、波士顿动力（机器人）、以及数十家AI初创企业。它不直接参与任何一层的产品竞争，却在每一层都有战略投资布局。',
+    nikkei?.changePercent
+  )
+  const chainSummary = chainData?.summary ?? (nikkei
     ? `全球AI半导体产业链已形成清晰的价值流转路径：云服务商的大规模资本支出驱动芯片设计厂商订单爆发，进而拉动HBM存储、半导体设备和晶圆代工的全链条需求。软银集团作为投资层，横跨整个链条捕获价值。当前日经225${nikkei.changePercent >= 0 ? '上涨' : '调整'}${Math.abs(nikkei.changePercent).toFixed(2)}%，反映市场对全产业链的系统性${nikkei.changePercent >= 0 ? '重估' : '再定价'}。`
-    : '全球AI半导体产业链已形成清晰的价值流转路径：云服务商的资本支出驱动芯片设计厂商订单爆发，进而拉动HBM存储、半导体设备和晶圆代工的全链条需求。软银集团作为投资层，横跨整个链条捕获价值。'
+    : '全球AI半导体产业链已形成清晰的价值流转路径：云服务商的资本支出驱动芯片设计厂商订单爆发，进而拉动HBM存储、半导体设备和晶圆代工的全链条需求。软银集团作为投资层，横跨整个链条捕获价值。')
 
   useGSAP(() => {
     const ctx = gsap.context(() => {
@@ -535,18 +504,18 @@ export default function Chain() {
 
           {/* Desktop SVG diagram */}
           <div className="chain-node-desktop hidden lg:block opacity-0">
-            <DesktopDiagram onNodeClick={scrollTo} />
+            <DesktopDiagram layers={layers} onNodeClick={scrollTo} />
           </div>
 
           {/* Mobile HTML diagram */}
           <div className="chain-node-mobile lg:hidden">
-            <MobileChain onNodeClick={scrollTo} />
+            <MobileChain layers={layers} onNodeClick={scrollTo} />
           </div>
         </div>
       </section>
 
       {/* ===== Layer Detail Sections ===== */}
-      {LAYERS.map((layer) => (
+      {layers.map((layer) => (
         <section
           key={layer.id}
           id={`layer-${layer.id}`}
@@ -644,7 +613,7 @@ export default function Chain() {
             INVESTMENT LAYER
           </p>
           <h2 className="investment-detail-fade font-display text-[2.25rem] text-platinum leading-[1.2] tracking-[-0.01em] mb-8 opacity-0">
-            投资层: 软银集团
+            {investment?.title ?? '投资层: 软银集团'}
           </h2>
 
           <p className="investment-detail-fade font-body text-[1.0625rem] text-silver leading-[1.8] mb-12 opacity-0">
@@ -652,7 +621,12 @@ export default function Chain() {
           </p>
 
           <div className="star-node opacity-0">
-            <InvestmentStar />
+            <InvestmentStar portfolio={investment?.portfolio ?? [
+              { name: 'OpenAI', role: '生成式AI' },
+              { name: 'Arm', role: '芯片架构' },
+              { name: '波士顿动力', role: '机器人' },
+              { name: '其他AI投资', role: '初创组合' },
+            ]} />
           </div>
         </div>
       </section>
