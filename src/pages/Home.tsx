@@ -78,7 +78,7 @@ function HeroSection() {
         style={{ transform: 'scale(0.95)' }}
       >
         <img
-          src="/hero-bg.jpg"
+          src="./hero-bg.jpg"
           alt=""
           className="w-full h-full object-cover"
         />

@@ -477,7 +477,7 @@ export default function Chain() {
       <section className="relative w-full overflow-hidden" style={{ height: '55vh', minHeight: '480px' }}>
         <div
           className="chain-hero-bg absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(/chip-abstract.jpg)', transformOrigin: 'center center' }}
+          style={{ backgroundImage: 'url(./chip-abstract.jpg)', transformOrigin: 'center center' }}
         />
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(10,10,10,0.6)' }} />
         <div className="relative z-10 max-w-[800px] mx-auto px-6 md:px-20 h-full flex flex-col justify-center">
