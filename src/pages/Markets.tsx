@@ -20,6 +20,12 @@ import type { ValueType, NameType } from 'recharts/types/component/DefaultToolti
 
 gsap.registerPlugin(ScrollTrigger)
 
+/* ─── Trend Color Helpers ─── */
+const trendClass = (change: number) => change >= 0 ? 'text-rise-green' : 'text-fall-red'
+const trendBorderColor = (change: number) => change >= 0 ? '#FF6B6B' : '#1DB954'
+const trendRgba = (change: number, alpha: number) => change >= 0 ? `rgba(255,107,107,${alpha})` : `rgba(29,185,84,${alpha})`
+const trendBgRgba = (change: number, alpha: number) => change >= 0 ? `rgba(255,107,107,${alpha})` : `rgba(29,185,84,${alpha})`
+
 /* ─── Data Types ─── */
 interface IndexData {
   name: string
@@ -74,7 +80,7 @@ function ErrorSection() {
   return (
     <div className="bg-obsidian py-[120px]">
       <div className="max-w-[1200px] mx-auto px-6">
-        <p className="text-fall-red text-center">数据加载失败</p>
+        <p className="text-red-500 text-center">数据加载失败</p>
       </div>
     </div>
   )
@@ -231,7 +237,7 @@ function USIndicesSection({ indices }: { indices: IndexData[] }) {
               <div
                 key={idx.symbol}
                 className="us-index-card rounded-xl border border-dim bg-[rgba(20,20,20,0.6)] backdrop-blur-md overflow-hidden transition-all duration-300 hover:border-gold/40"
-                style={{ borderLeftWidth: '3px', borderLeftColor: '#FF6B6B' }}
+                style={{ borderLeftWidth: '3px', borderLeftColor: trendBorderColor(idx.change) }}
               >
                 {/* Top: Data */}
                 <div className="p-8 md:p-10">
@@ -246,10 +252,10 @@ function USIndicesSection({ indices }: { indices: IndexData[] }) {
                         </span>
                       </div>
                       <div className="flex items-center gap-4 mb-4">
-                        <span className="font-mono text-[1.25rem] text-fall-red font-medium">
+                        <span className={`font-mono text-[1.25rem] ${trendClass(idx.change)} font-medium`}>
                           {idx.changePercent.toFixed(2)}%
                         </span>
-                        <span className="font-mono text-[0.875rem] text-fall-red">
+                        <span className={`font-mono text-[0.875rem] ${trendClass(idx.change)}`}>
                           {idx.change.toFixed(2)}点
                         </span>
                       </div>
@@ -264,8 +270,8 @@ function USIndicesSection({ indices }: { indices: IndexData[] }) {
                         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                           <defs>
                             <linearGradient id={`usGrad-${i}`} x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#FF6B6B" stopOpacity={0.25} />
-                              <stop offset="100%" stopColor="#FF6B6B" stopOpacity={0} />
+                              <stop offset="0%" stopColor={trendBorderColor(idx.change)} stopOpacity={0.25} />
+                              <stop offset="100%" stopColor={trendBorderColor(idx.change)} stopOpacity={0} />
                             </linearGradient>
                           </defs>
                           <XAxis dataKey="time" tick={{ fill: '#4A4A4A', fontSize: 10 }} axisLine={false} tickLine={false} />
@@ -275,7 +281,7 @@ function USIndicesSection({ indices }: { indices: IndexData[] }) {
                             itemStyle={{ color: '#E8E4E0', fontSize: '0.75rem' }}
                             labelStyle={{ color: '#6A6A6A', fontSize: '0.625rem' }}
                           />
-                          <Area type="monotone" dataKey="value" stroke="#FF6B6B" strokeWidth={2} fill={`url(#usGrad-${i})`} dot={false} />
+                          <Area type="monotone" dataKey="value" stroke={trendBorderColor(idx.change)} strokeWidth={2} fill={`url(#usGrad-${i})`} dot={false} />
                         </AreaChart>
                       </ResponsiveContainer>
                     </div>
@@ -377,22 +383,22 @@ function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
               <p className="font-body text-[0.8125rem] text-muted mt-1">收盘</p>
             </div>
             <div>
-              <span ref={pointsRef} className="font-mono text-[2rem] font-normal text-rise-green leading-none block">
+              <span ref={pointsRef} className={`font-mono text-[2rem] font-normal ${trendClass(nikkei.change)} leading-none block`}>
                 {nikkei.change >= 0 ? '+' : ''}{nikkei.change.toFixed(2)}
               </span>
               <p className="font-body text-[0.8125rem] text-muted mt-1">涨跌点数</p>
             </div>
             <div>
-              <span ref={pctRef} className="font-mono text-[2rem] font-normal text-rise-green leading-none block">
+              <span ref={pctRef} className={`font-mono text-[2rem] font-normal ${trendClass(nikkei.change)} leading-none block`}>
                 {nikkei.changePercent >= 0 ? '+' : ''}{nikkei.changePercent.toFixed(2)}%
               </span>
               <p className="font-body text-[0.8125rem] text-muted mt-1">涨跌幅</p>
             </div>
           </div>
 
-          <div className="animate-item inline-block rounded px-3 py-1" style={{ backgroundColor: 'rgba(29,185,84,0.15)' }}>
-            <span className="font-body text-[0.8125rem] text-rise-green">
-              创历史最大单日点数涨幅
+          <div className="animate-item inline-block rounded px-3 py-1" style={{ backgroundColor: trendBgRgba(nikkei.change, 0.15) }}>
+            <span className={`font-body text-[0.8125rem] ${trendClass(nikkei.change)}`}>
+              {nikkei.change >= 0 ? '创历史最大单日点数涨幅' : '单日大幅下跌'}
             </span>
           </div>
         </div>
@@ -403,8 +409,8 @@ function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
             <AreaChart data={intraday} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="nikkeiGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgba(29,185,84,0.2)" />
-                  <stop offset="100%" stopColor="rgba(29,185,84,0)" />
+                  <stop offset="0%" stopColor={trendRgba(nikkei.change, 0.2)} />
+                  <stop offset="100%" stopColor={trendRgba(nikkei.change, 0)} />
                 </linearGradient>
               </defs>
               <CartesianGrid stroke="#2A2A2A" strokeWidth={0.5} vertical={false} />
@@ -425,11 +431,11 @@ function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke="#1DB954"
+                stroke={trendBorderColor(nikkei.change)}
                 strokeWidth={3}
                 fill="url(#nikkeiGradient)"
                 dot={false}
-                activeDot={{ r: 5, fill: '#1DB954', stroke: '#0A0A0A', strokeWidth: 2 }}
+                activeDot={{ r: 5, fill: trendBorderColor(nikkei.change), stroke: '#0A0A0A', strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -469,7 +475,7 @@ function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
               '日本本土半导体产业链全面受益',
             ].map((text, i) => (
               <div key={i} className="driver-item flex items-start gap-4">
-                <div className="w-[2px] h-full min-h-[24px] bg-rise-green rounded-full flex-shrink-0 mt-1" />
+                <div className={`w-[2px] h-full min-h-[24px] ${nikkei.change >= 0 ? 'bg-rise-green' : 'bg-fall-red'} rounded-full flex-shrink-0 mt-1`} />
                 <p className="font-body text-[0.9375rem] text-silver leading-relaxed">{text}</p>
               </div>
             ))}
@@ -543,16 +549,16 @@ function KOSPISection({ kospi }: { kospi: IndexData }) {
               <p className="font-body text-[0.8125rem] text-muted mt-1">收盘</p>
             </div>
             <div>
-              <span ref={pctRef} className="font-mono text-[2rem] font-normal text-rise-green leading-none block">
+              <span ref={pctRef} className={`font-mono text-[2rem] font-normal ${trendClass(kospi.change)} leading-none block`}>
                 {kospi.changePercent >= 0 ? '+' : ''}{kospi.changePercent.toFixed(2)}%
               </span>
               <p className="font-body text-[0.8125rem] text-muted mt-1">涨跌幅</p>
             </div>
           </div>
 
-          <div className="animate-item inline-block rounded px-3 py-1" style={{ backgroundColor: 'rgba(29,185,84,0.15)' }}>
-            <span className="font-body text-[0.8125rem] text-rise-green">
-              盘中创历史新高 7,531.88
+          <div className="animate-item inline-block rounded px-3 py-1" style={{ backgroundColor: trendBgRgba(kospi.change, 0.15) }}>
+            <span className={`font-body text-[0.8125rem] ${trendClass(kospi.change)}`}>
+              {kospi.change >= 0 ? '盘中创历史新高' : '盘中大幅波动'}
             </span>
           </div>
         </div>
@@ -563,8 +569,8 @@ function KOSPISection({ kospi }: { kospi: IndexData }) {
             <AreaChart data={intraday} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="kospiGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgba(29,185,84,0.2)" />
-                  <stop offset="100%" stopColor="rgba(29,185,84,0)" />
+                  <stop offset="0%" stopColor={trendRgba(kospi.change, 0.2)} />
+                  <stop offset="100%" stopColor={trendRgba(kospi.change, 0)} />
                 </linearGradient>
               </defs>
               <CartesianGrid stroke="#2A2A2A" strokeWidth={0.5} vertical={false} />
@@ -585,11 +591,11 @@ function KOSPISection({ kospi }: { kospi: IndexData }) {
               <Area
                 type="monotone"
                 dataKey="value"
-                stroke="#1DB954"
+                stroke={trendBorderColor(kospi.change)}
                 strokeWidth={3}
                 fill="url(#kospiGradient)"
                 dot={false}
-                activeDot={{ r: 5, fill: '#1DB954', stroke: '#0A0A0A', strokeWidth: 2 }}
+                activeDot={{ r: 5, fill: trendBorderColor(kospi.change), stroke: '#0A0A0A', strokeWidth: 2 }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -641,7 +647,7 @@ function ComparisonSection({ indices }: { indices: IndexData[] }) {
   const crossMarketData = indices.map(idx => ({
     name: idx.name,
     value: idx.changePercent,
-    color: idx.changePercent >= 0 ? '#1DB954' : '#FF6B6B',
+    color: idx.changePercent >= 0 ? '#FF6B6B' : '#1DB954',
   }))
 
   useGSAP(() => {

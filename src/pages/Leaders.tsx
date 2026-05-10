@@ -6,6 +6,9 @@ import { useGSAP } from '@gsap/react'
 
 gsap.registerPlugin(ScrollTrigger)
 
+/* ─── Trend Color Helper ─── */
+const trendClass = (change: number) => change >= 0 ? 'text-rise-green' : 'text-fall-red'
+
 /* ─── Data Types ─── */
 interface StockData {
   id: number
@@ -59,7 +62,7 @@ function ErrorSection() {
   return (
     <div className="bg-obsidian py-[120px]">
       <div className="max-w-[1200px] mx-auto px-6">
-        <p className="text-fall-red text-center">数据加载失败</p>
+        <p className="text-red-500 text-center">数据加载失败</p>
       </div>
     </div>
   )
@@ -133,7 +136,7 @@ function StockCard({ stock }: { stock: StockData }) {
           {/* Data side */}
           <div className="flex-[1.5] flex flex-col justify-center">
             <div className="card-animate mb-2">
-              <span className="font-mono text-[3.5rem] font-medium leading-none text-rise-green tracking-tight">
+              <span className={`font-mono text-[3.5rem] font-medium leading-none ${trendClass(stock.change)} tracking-tight`}>
                 <Counter target={stock.change} suffix="%" />
               </span>
             </div>
@@ -208,8 +211,8 @@ function ComparisonSection({ stocks, maxChange }: { stocks: StockData[]; maxChan
                     </div>
                   </div>
 
-                  <p className="font-mono text-[1.125rem] text-rise-green mb-1">
-                    +{stock.change}%
+                  <p className={`font-mono text-[1.125rem] ${trendClass(stock.change)} mb-1`}>
+                    {stock.change >= 0 ? '+' : ''}{stock.change}%
                   </p>
                   <p className="font-body text-[0.8125rem] text-muted">
                     {stock.tag.split(' · ')[0]}

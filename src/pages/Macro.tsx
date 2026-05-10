@@ -87,7 +87,7 @@ function ErrorSection() {
   return (
     <div className="bg-obsidian py-[120px]">
       <div className="max-w-[1200px] mx-auto px-6">
-        <p className="text-fall-red text-center">数据加载失败</p>
+        <p className="text-red-500 text-center">数据加载失败</p>
       </div>
     </div>
   )

@@ -6,6 +6,10 @@ import { useGSAP } from '@gsap/react'
 
 gsap.registerPlugin(ScrollTrigger)
 
+/* ─── Trend Color Helpers ─── */
+const trendClass = (change: number) => change >= 0 ? 'text-rise-green' : 'text-fall-red'
+const trendBorderColor = (change: number) => change >= 0 ? '#FF6B6B' : '#1DB954'
+
 /* ─── Data Types ─── */
 interface MarketData {
   lastUpdated: string
@@ -196,7 +200,7 @@ function MarketPulseSection() {
   if (error || !data) return (
     <div className="bg-obsidian py-[120px]">
       <div className="max-w-[1200px] mx-auto px-6">
-        <p className="text-fall-red text-center">数据加载失败</p>
+        <p className="text-red-500 text-center">数据加载失败</p>
       </div>
     </div>
   )
@@ -223,7 +227,7 @@ function MarketPulseSection() {
             <div
               key={idx.symbol}
               className="us-index-card rounded-xl p-10 border border-dim bg-[rgba(20,20,20,0.6)] backdrop-blur-md transition-all duration-300 hover:border-gold/50 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(201,169,98,0.08)]"
-              style={{ borderLeftWidth: '3px', borderLeftColor: '#FF6B6B' }}
+              style={{ borderLeftWidth: '3px', borderLeftColor: trendBorderColor(idx.change) }}
             >
               <h3 className="font-body text-2xl font-medium text-platinum mb-1">{idx.name}</h3>
               <p className="font-body text-[0.8125rem] text-muted tracking-wider mb-6">{idx.nameEn}</p>
@@ -238,10 +242,10 @@ function MarketPulseSection() {
               </div>
 
               <div className="flex items-center gap-4 mb-3">
-                <span className="font-mono text-[2rem] font-normal text-fall-red">
+                <span className={`font-mono text-[2rem] font-normal ${trendClass(idx.change)}`}>
                   {idx.change >= 0 ? '+' : ''}{idx.changePercent.toFixed(2)}%
                 </span>
-                <span className="font-body text-[0.8125rem] text-fall-red">
+                <span className={`font-body text-[0.8125rem] ${trendClass(idx.change)}`}>
                   {idx.change >= 0 ? '+' : ''}{idx.change.toFixed(2)}点
                 </span>
               </div>
@@ -260,7 +264,7 @@ function MarketPulseSection() {
 
           {/* Card 2 — Nikkei */}
           {nikkei && (
-            <div className="rounded-xl p-10 border border-dim bg-[rgba(20,20,20,0.6)] backdrop-blur-md transition-all duration-300 hover:border-gold/50 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(201,169,98,0.08)]" style={{ borderLeftWidth: '3px', borderLeftColor: '#1DB954' }}>
+            <div className="rounded-xl p-10 border border-dim bg-[rgba(20,20,20,0.6)] backdrop-blur-md transition-all duration-300 hover:border-gold/50 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(201,169,98,0.08)]" style={{ borderLeftWidth: '3px', borderLeftColor: trendBorderColor(nikkei.change) }}>
               <h3 className="font-body text-2xl font-medium text-platinum mb-1">日经225指数</h3>
               <p className="font-body text-[0.8125rem] text-muted tracking-wider mb-6">Japan</p>
 
@@ -269,12 +273,12 @@ function MarketPulseSection() {
               </div>
 
               <div className="flex items-center gap-4 mb-3">
-                <span className="font-mono text-[2rem] font-normal text-rise-green">+{nikkei.changePercent.toFixed(2)}%</span>
-                <span className="font-body text-[0.8125rem] text-rise-green">+{nikkei.change >= 1000 ? (nikkei.change / 1000).toFixed(0) + ',' + (nikkei.change % 1000).toFixed(0).padStart(3, '0') : Math.round(nikkei.change).toLocaleString()}点</span>
+                <span className={`font-mono text-[2rem] font-normal ${trendClass(nikkei.change)}`}>{nikkei.change >= 0 ? '+' : ''}{nikkei.changePercent.toFixed(2)}%</span>
+                <span className={`font-body text-[0.8125rem] ${trendClass(nikkei.change)}`}>{nikkei.change >= 0 ? '+' : ''}{nikkei.change >= 1000 ? (nikkei.change / 1000).toFixed(0) + ',' + (nikkei.change % 1000).toFixed(0).padStart(3, '0') : Math.round(nikkei.change).toLocaleString()}点</span>
               </div>
 
               <p className="font-body text-[0.9375rem] text-light-gold mb-4">
-                创历史最大单日点数涨幅
+                {nikkei.change >= 0 ? '创历史最大单日点数涨幅' : '单日大幅下跌'}
               </p>
 
               <div className="pt-4 border-t border-dim">
@@ -287,7 +291,7 @@ function MarketPulseSection() {
 
           {/* Card 3 — KOSPI */}
           {kospi && (
-            <div className="rounded-xl p-10 border border-dim bg-[rgba(20,20,20,0.6)] backdrop-blur-md transition-all duration-300 hover:border-gold/50 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(201,169,98,0.08)]" style={{ borderLeftWidth: '3px', borderLeftColor: '#1DB954' }}>
+            <div className="rounded-xl p-10 border border-dim bg-[rgba(20,20,20,0.6)] backdrop-blur-md transition-all duration-300 hover:border-gold/50 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(201,169,98,0.08)]" style={{ borderLeftWidth: '3px', borderLeftColor: trendBorderColor(kospi.change) }}>
               <h3 className="font-body text-2xl font-medium text-platinum mb-1">韩国KOSPI指数</h3>
               <p className="font-body text-[0.8125rem] text-muted tracking-wider mb-6">South Korea</p>
 
@@ -296,11 +300,11 @@ function MarketPulseSection() {
               </div>
 
               <div className="flex items-center gap-4 mb-3">
-                <span className="font-mono text-[2rem] font-normal text-rise-green">+{kospi.changePercent.toFixed(2)}%</span>
+                <span className={`font-mono text-[2rem] font-normal ${trendClass(kospi.change)}`}>{kospi.change >= 0 ? '+' : ''}{kospi.changePercent.toFixed(2)}%</span>
               </div>
 
               <p className="font-body text-[0.8125rem] text-light-gold mb-4">
-                盘中创历史新高 7,531.88
+                {kospi.change >= 0 ? '盘中创历史新高' : '盘中大幅波动'}
               </p>
 
               <div className="pt-4 border-t border-dim">

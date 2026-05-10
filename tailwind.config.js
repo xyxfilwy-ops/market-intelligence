@@ -57,8 +57,8 @@ module.exports = {
         silver: "#B0B0B0",
         muted: "#6A6A6A",
         dim: "#3A3A3A",
-        "rise-green": "#1DB954",
-        "fall-red": "#FF6B6B",
+        "rise-green": "#FF6B6B",
+        "fall-red": "#1DB954",
         "deep-gold": "#8B7355",
       },
       fontFamily: {
