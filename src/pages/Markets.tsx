@@ -167,28 +167,28 @@ function HeroSection() {
   )
 }
 
+/* ─── Intraday chart data generator ─── */
+function generateChartData(close: number, change: number) {
+  const start = close - change
+  const data: { time: string; value: number }[] = []
+  for (let i = 0; i <= 12; i++) {
+    const t = i / 12
+    const trend = start + (close - start) * t
+    const noise = Math.sin(i * 1.3) * Math.abs(change) * 0.3
+    data.push({
+      time: `${9 + Math.floor(i * 0.5)}:${String((i * 30) % 60).padStart(2, '0')}`,
+      value: trend + noise,
+    })
+  }
+  return data
+}
+
 /* ─── Section 2: US Indices — one per large area ─── */
 function USIndicesSection({ indices }: { indices: IndexData[] }) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLDivElement>(null)
 
   const usIndices = indices.filter(i => i.region === 'United States')
-
-  // Generate intraday-like data for each index
-  const generateChartData = (close: number, change: number) => {
-    const start = close - change
-    const data: { time: string; value: number }[] = []
-    for (let i = 0; i <= 12; i++) {
-      const t = i / 12
-      const trend = start + (close - start) * t
-      const noise = Math.sin(i * 1.3) * Math.abs(change) * 0.3
-      data.push({
-        time: `${9 + Math.floor(i * 0.5)}:${String((i * 30) % 60).padStart(2, '0')}`,
-        value: trend + noise,
-      })
-    }
-    return data
-  }
 
   useGSAP(() => {
     const ctx = gsap.context(() => {
@@ -361,7 +361,7 @@ function NikkeiSection({ nikkei }: { nikkei: IndexData }) {
     return () => ctx.revert()
   }, { scope: sectionRef })
 
-  const intraday = nikkei.intraday ?? []
+  const intraday = nikkei.intraday ?? generateChartData(nikkei.close, nikkei.change)
 
   return (
     <section ref={sectionRef} className="bg-charcoal py-[120px]">
@@ -527,7 +527,7 @@ function KOSPISection({ kospi }: { kospi: IndexData }) {
     return () => ctx.revert()
   }, { scope: sectionRef })
 
-  const intraday = kospi.intraday ?? []
+  const intraday = kospi.intraday ?? generateChartData(kospi.close, kospi.change)
 
   return (
     <section ref={sectionRef} className="bg-obsidian py-[120px]">
