@@ -1,96 +1,170 @@
 {
-  "lastUpdated": "2026-05-08T07:00:00Z",
-  "stocks": [
+  "lastUpdated": "2026-05-10T23:08:05+08:00",
+  "indices": [
     {
-      "id": 1,
-      "name": "软银集团",
-      "nameEn": "SoftBank Group",
-      "code": "9984.JP",
-      "market": "日经225",
-      "change": 18.4,
-      "weight": "~8.4%",
-      "contribution": "~717日元",
-      "tag": "投资控股 · AI生态",
-      "logo": "/softbank-logo.svg",
-      "analysis": [
-        "OpenAI投资：旗下愿景基金深度布局OpenAI，直接受益于$250B Stargate项目",
-        "Arm Holdings：持有Arm 90%股权，Arm架构主导全球AI芯片设计底层",
-        "Golden Week rally：黄金周后补涨行情，日经225最大贡献股"
-      ],
-      "isMirror": false
+      "indexName": "道琼斯工业平均指数",
+      "indexSymbol": "^DJI",
+      "date": "2026-05-10",
+      "topContributors": [
+        {
+          "symbol": "UNH",
+          "name": "联合健康集团",
+          "nameEn": "UnitedHealth Group",
+          "changePercent": 2.77,
+          "weight": "~8.8%",
+          "contribution": "+0.2点",
+          "sector": "医疗保健",
+          "analysis": [
+            "老龄化趋势推动医疗需求刚性增长",
+            "创新药管线进入收获期",
+            "医保覆盖扩大提升药品可及性"
+          ],
+          "rank": 1,
+          "contributionShare": "~52.2%"
+        },
+        {
+          "symbol": "MCD",
+          "name": "麦当劳",
+          "nameEn": "McDonald's",
+          "changePercent": -2.8,
+          "weight": "~4.2%",
+          "contribution": "-0.1点",
+          "sector": "餐饮",
+          "analysis": [
+            "反垄断监管压力加大",
+            "云业务增速放缓，市场担忧估值回调",
+            "宏观经济下行影响企业IT支出"
+          ],
+          "rank": 2,
+          "contributionShare": "~26.1%"
+        },
+        {
+          "symbol": "HD",
+          "name": "家得宝",
+          "nameEn": "Home Depot",
+          "changePercent": -1.61,
+          "weight": "~6.2%",
+          "contribution": "-0.1点",
+          "sector": "零售",
+          "analysis": [
+            "消费降级趋势影响客单价",
+            "电商竞争加剧分流线下客流",
+            "通胀压力侵蚀消费者购买力"
+          ],
+          "rank": 3,
+          "contributionShare": "~21.7%"
+        }
+      ]
     },
     {
-      "id": 2,
-      "name": "SK海力士",
-      "nameEn": "SK Hynix",
-      "code": "000660.KS",
-      "market": "KOSPI",
-      "change": 3.31,
-      "weight": "~18-22%",
-      "contribution": "~247点",
-      "tag": "存储芯片 · HBM龙头",
-      "logo": "/skhynix-logo.svg",
-      "analysis": [
-        "HBM垄断地位：全球HBM市占率57-62%，NVIDIA HBM4供货占比70%",
-        "利润爆发：毛利率79%，营业利润率72%创历史最高，产能售罄至2026年",
-        "技术壁垒：率先量产HBM3E 12Hi堆叠，领先三星与美光至少一代"
-      ],
-      "isMirror": true
+      "indexName": "日经225",
+      "indexSymbol": "^N225",
+      "date": "2026-05-10",
+      "topContributors": [
+        {
+          "symbol": "9984.T",
+          "name": "软银集团",
+          "nameEn": "SoftBank Group",
+          "changePercent": -4.56,
+          "weight": "~8.4%",
+          "contribution": "-0.4点",
+          "sector": "投资控股",
+          "analysis": [
+            "投资组合估值回调，未实现收益下降",
+            "科技板块估值压缩影响投资收益",
+            "宏观经济不确定性增加投资难度"
+          ],
+          "rank": 1,
+          "contributionShare": "~45.8%"
+        },
+        {
+          "symbol": "6861.T",
+          "name": "基恩士",
+          "nameEn": "Keyence",
+          "changePercent": 6.07,
+          "weight": "~6.0%",
+          "contribution": "+0.4点",
+          "sector": "工业自动化",
+          "analysis": [
+            "AI应用商业化加速，云业务增长强劲",
+            "企业数字化转型需求持续释放",
+            "新产品发布带动市场乐观预期"
+          ],
+          "rank": 2,
+          "contributionShare": "~43.4%"
+        },
+        {
+          "symbol": "9983.T",
+          "name": "迅销",
+          "nameEn": "Fast Retailing",
+          "changePercent": -1.0,
+          "weight": "~8.5%",
+          "contribution": "-0.1点",
+          "sector": "零售",
+          "analysis": [
+            "消费降级趋势影响客单价",
+            "电商竞争加剧分流线下客流",
+            "通胀压力侵蚀消费者购买力"
+          ],
+          "rank": 3,
+          "contributionShare": "~10.8%"
+        }
+      ]
     },
     {
-      "id": 3,
-      "name": "三星电子",
-      "nameEn": "Samsung Electronics",
-      "code": "005930.KS",
-      "market": "KOSPI",
-      "change": 2.07,
-      "weight": "~22-25%",
-      "contribution": "~155点",
-      "tag": "综合半导体 · 存储/代工",
-      "logo": "/samsung-logo.svg",
-      "analysis": [
-        "利润激增：Q1利润同比+756%，HBM4全球率先量产",
-        "市值突破：市值突破1万亿美元，DRAM价格暴涨90-95%",
-        "估值优势：Forward PE仅5.9x，全产业链优势覆盖存储、代工、手机、显示"
-      ],
-      "isMirror": false
-    },
-    {
-      "id": 4,
-      "name": "东京电子",
-      "nameEn": "Tokyo Electron",
-      "code": "8035.JP",
-      "market": "日经225",
-      "change": 9.0,
-      "weight": "~9.81%",
-      "contribution": "~424日元",
-      "tag": "半导体设备 · 刻蚀/沉积",
-      "logo": "/tokyo-electron-logo.svg",
-      "analysis": [
-        "设备龙头：全球半导体刻蚀/沉积设备领导者，3nm及以下工艺核心设备商",
-        "AI芯片驱动：先进制程沉积与刻蚀步骤增加，设备需求爆发式增长",
-        "指数映射效应：PHLX半导体指数上涨带动日经225半导体板块联动"
-      ],
-      "isMirror": true
-    },
-    {
-      "id": 5,
-      "name": "爱德万测试",
-      "nameEn": "Advantest",
-      "code": "6857.JP",
-      "market": "日经225",
-      "change": 6.8,
-      "weight": "~14.33%",
-      "contribution": "~527日元",
-      "tag": "半导体测试 · 核心设备",
-      "logo": "/advantest-logo.svg",
-      "analysis": [
-        "AI芯片测试刚需：NVIDIA H100/B200芯片ATE测试设备核心供应商",
-        "业绩上调：FY利润指引上调25%，CEO表示\"多年高增长周期 ahead\"",
-        "先进封装测试：CoWoS等先进封装技术推动测试设备需求量倍增"
-      ],
-      "isMirror": false
+      "indexName": "韩国综合股价指数",
+      "indexSymbol": "^KS11",
+      "date": "2026-05-10",
+      "topContributors": [
+        {
+          "symbol": "005380.KS",
+          "name": "现代汽车",
+          "nameEn": "Hyundai Motor",
+          "changePercent": 7.17,
+          "weight": "~5.5%",
+          "contribution": "+0.4点",
+          "sector": "汽车",
+          "analysis": [
+            "电动车销量持续增长，市场份额扩大",
+            "电池成本下降推动盈利能力改善",
+            "新兴市场需求旺盛，出口增长强劲"
+          ],
+          "rank": 1,
+          "contributionShare": "~54.9%"
+        },
+        {
+          "symbol": "005930.KS",
+          "name": "三星电子",
+          "nameEn": "Samsung Electronics",
+          "changePercent": -1.1,
+          "weight": "~16.8%",
+          "contribution": "-0.2点",
+          "sector": "半导体",
+          "analysis": [
+            "下游消费电子库存调整，短期需求疲软",
+            "成熟制程价格战压缩毛利率",
+            "地缘政治风险导致部分订单延迟"
+          ],
+          "rank": 2,
+          "contributionShare": "~25.4%"
+        },
+        {
+          "symbol": "000660.KS",
+          "name": "SK海力士",
+          "nameEn": "SK Hynix",
+          "changePercent": 1.93,
+          "weight": "~7.2%",
+          "contribution": "+0.1点",
+          "sector": "半导体",
+          "analysis": [
+            "AI算力需求持续爆发，芯片订单排产至2027年",
+            "先进制程产能利用率维持满载，ASP持续上行",
+            "全球数据中心资本开支超预期增长"
+          ],
+          "rank": 3,
+          "contributionShare": "~19.7%"
+        }
+      ]
     }
-  ],
-  "maxChange": 18.4
+  ]
 }

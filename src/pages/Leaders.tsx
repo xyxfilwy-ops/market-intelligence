@@ -10,25 +10,29 @@ gsap.registerPlugin(ScrollTrigger)
 const trendClass = (change: number) => change >= 0 ? 'text-rise-green' : 'text-fall-red'
 
 /* ─── Data Types ─── */
-interface StockData {
-  id: number
+interface Contributor {
+  symbol: string
   name: string
   nameEn: string
-  code: string
-  market: string
-  change: number
+  changePercent: number
   weight: string
   contribution: string
-  tag: string
-  logo: string
+  sector: string
   analysis: string[]
-  isMirror: boolean
+  rank: number
+  contributionShare: string
+}
+
+interface IndexData {
+  indexName: string
+  indexSymbol: string
+  date: string
+  topContributors: Contributor[]
 }
 
 interface LeadersData {
   lastUpdated: string
-  stocks: StockData[]
-  maxChange: number
+  indices: IndexData[]
 }
 
 /* ─── Data Loading Hook ─── */
@@ -104,44 +108,42 @@ function Counter({ target, suffix = '', decimals = 2 }: CounterProps) {
 }
 
 /* ─── Stock Card ─── */
-function StockCard({ stock }: { stock: StockData }) {
+function StockCard({ stock, isMirror }: { stock: Contributor; isMirror: boolean }) {
   return (
     <section
-      className={`stock-card py-20 ${stock.isMirror ? 'bg-charcoal' : 'bg-obsidian'}`}
+      className={`stock-card py-20 ${isMirror ? 'bg-charcoal' : 'bg-obsidian'}`}
     >
       <div className="max-w-[1200px] mx-auto px-6 md:px-20">
         <div
           className={`flex flex-col ${
-            stock.isMirror ? 'md:flex-row-reverse' : 'md:flex-row'
+            isMirror ? 'md:flex-row-reverse' : 'md:flex-row'
           } gap-8 md:gap-0 rounded-2xl border border-dim p-8 md:p-12 bg-[rgba(20,20,20,0.9)] hover:border-[rgba(201,169,98,0.3)] hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(201,169,98,0.08)] transition-all duration-300`}
         >
           {/* Brand side */}
           <div className="flex-1 flex flex-col justify-center border-l-[3px] border-gold pl-6 md:pl-8 md:pr-8">
-            <img
-              className="card-logo w-20 h-20 mb-6 object-contain filter brightness-90 hover:brightness-110 transition-all duration-300"
-              src={stock.logo}
-              alt={stock.name}
-            />
+            <div className="card-logo w-20 h-20 mb-6 rounded-full bg-charcoal border border-dim flex items-center justify-center">
+              <span className="text-gold font-mono text-xl font-bold">{stock.symbol.slice(0, 2)}</span>
+            </div>
             <h3 className="card-animate font-display text-2xl text-platinum mb-2">
               {stock.name}
             </h3>
             <p className="card-animate font-mono text-sm text-muted mb-4">
-              {stock.code}
+              {stock.symbol}
             </p>
             <span className="card-animate inline-block self-start px-3 py-1 rounded bg-[rgba(201,169,98,0.12)] text-gold text-xs tracking-wider font-body">
-              {stock.tag}
+              {stock.sector} · 贡献度 #{stock.rank}
             </span>
           </div>
 
           {/* Data side */}
           <div className="flex-[1.5] flex flex-col justify-center">
             <div className="card-animate mb-2">
-              <span className={`font-mono text-[3.5rem] font-medium leading-none ${trendClass(stock.change)} tracking-tight`}>
-                <Counter target={stock.change} suffix="%" />
+              <span className={`font-mono text-[3.5rem] font-medium leading-none ${trendClass(stock.changePercent)} tracking-tight`}>
+                <Counter target={stock.changePercent} suffix="%" />
               </span>
             </div>
             <p className="card-animate text-xs text-light-gold mb-6 tracking-wide font-body">
-              {stock.market} 核心贡献股
+              {stock.contributionShare} 指数贡献占比
             </p>
 
             <div className="card-animate grid grid-cols-2 gap-4 mb-6">
@@ -178,28 +180,75 @@ function StockCard({ stock }: { stock: StockData }) {
 }
 
 /* ─── Comparison Section ─── */
-function ComparisonSection({ stocks, maxChange }: { stocks: StockData[]; maxChange: number }) {
+function ComparisonSection({ contributors, title }: { contributors: Contributor[]; title: string }) {
+  const sectionRef = useRef<HTMLElement>(null)
+  const maxChange = Math.max(...contributors.map(c => Math.abs(c.changePercent)), 0.01)
+
+  useGSAP(() => {
+    if (!sectionRef.current) return
+
+    const ctx = gsap.context(() => {
+      gsap.from('.comparison-title', {
+        opacity: 0,
+        y: 30,
+        duration: 0.7,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 85%',
+          once: true,
+        },
+      })
+
+      gsap.from('.comparison-col', {
+        opacity: 0,
+        y: 30,
+        duration: 1,
+        stagger: 0.1,
+        ease: 'power4.out',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 85%',
+          once: true,
+        },
+      })
+
+      gsap.from('.comparison-bar-inner', {
+        scaleY: 0,
+        duration: 1,
+        stagger: 0.1,
+        ease: 'power4.out',
+        transformOrigin: 'bottom',
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 85%',
+          once: true,
+        },
+      })
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, { scope: sectionRef })
+
   return (
-    <section className="comparison-section bg-charcoal py-[120px]">
+    <section ref={sectionRef} className="comparison-section bg-charcoal py-[120px]">
       <div className="max-w-[1200px] mx-auto px-6 md:px-20">
         <h2 className="comparison-title font-display text-[2.25rem] text-platinum font-medium tracking-tight text-center mb-16">
-          五强对比
+          {title}
         </h2>
 
         <div className="border border-dim rounded-xl p-8 md:p-10 bg-[rgba(20,20,20,0.6)]">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-4">
-            {stocks.map((stock) => {
-              const barHeight = (stock.change / maxChange) * 100
+          <div className="grid grid-cols-3 gap-6 md:gap-4">
+            {contributors.map((stock) => {
+              const barHeight = (Math.abs(stock.changePercent) / maxChange) * 100
               return (
                 <div
-                  key={stock.id}
+                  key={stock.symbol}
                   className="comparison-col flex flex-col items-center text-center"
                 >
-                  <img
-                    src={stock.logo}
-                    alt={stock.name}
-                    className="w-10 h-10 object-contain mb-3"
-                  />
+                  <div className="w-10 h-10 rounded-full bg-charcoal border border-dim flex items-center justify-center mb-3">
+                    <span className="text-gold font-mono text-xs font-bold">{stock.symbol.slice(0, 2)}</span>
+                  </div>
                   <p className="font-body text-[0.8125rem] text-platinum mb-4">
                     {stock.name}
                   </p>
@@ -211,11 +260,11 @@ function ComparisonSection({ stocks, maxChange }: { stocks: StockData[]; maxChan
                     </div>
                   </div>
 
-                  <p className={`font-mono text-[1.125rem] ${trendClass(stock.change)} mb-1`}>
-                    {stock.change >= 0 ? '+' : ''}{stock.change}%
+                  <p className={`font-mono text-[1.125rem] ${trendClass(stock.changePercent)} mb-1`}>
+                    {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent}%
                   </p>
                   <p className="font-body text-[0.8125rem] text-muted">
-                    {stock.tag.split(' · ')[0]}
+                    {stock.sector}
                   </p>
                 </div>
               )
@@ -224,6 +273,39 @@ function ComparisonSection({ stocks, maxChange }: { stocks: StockData[]; maxChan
         </div>
       </div>
     </section>
+  )
+}
+
+/* ─── Index Section ─── */
+function IndexSection({ indexData, sectionIndex }: { indexData: IndexData; sectionIndex: number }) {
+  return (
+    <>
+      <section className={`py-16 ${sectionIndex % 2 === 0 ? 'bg-obsidian' : 'bg-charcoal'}`}>
+        <div className="max-w-[1200px] mx-auto px-6 md:px-20">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="h-[2px] flex-1 bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+            <h2 className="font-display text-xl text-gold tracking-wider text-center">
+              {indexData.indexName}
+            </h2>
+            <div className="h-[2px] flex-1 bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+          </div>
+          <p className="text-center text-muted text-sm font-body">
+            {indexData.indexSymbol} · {indexData.date}
+          </p>
+        </div>
+      </section>
+      {indexData.topContributors.map((contributor, idx) => (
+        <StockCard
+          key={contributor.symbol}
+          stock={contributor}
+          isMirror={idx % 2 === 1}
+        />
+      ))}
+      <ComparisonSection
+        contributors={indexData.topContributors}
+        title={`${indexData.indexName} — 贡献度对比`}
+      />
+    </>
   )
 }
 
@@ -296,45 +378,6 @@ export default function Leaders() {
           })
         }
       })
-
-      // Comparison section animations
-      gsap.from('.comparison-title', {
-        opacity: 0,
-        y: 30,
-        duration: 0.7,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '.comparison-section',
-          start: 'top 85%',
-          once: true,
-        },
-      })
-
-      gsap.from('.comparison-col', {
-        opacity: 0,
-        y: 30,
-        duration: 1,
-        stagger: 0.1,
-        ease: 'power4.out',
-        scrollTrigger: {
-          trigger: '.comparison-section',
-          start: 'top 85%',
-          once: true,
-        },
-      })
-
-      gsap.from('.comparison-bar-inner', {
-        scaleY: 0,
-        duration: 1,
-        stagger: 0.1,
-        ease: 'power4.out',
-        transformOrigin: 'bottom',
-        scrollTrigger: {
-          trigger: '.comparison-section',
-          start: 'top 85%',
-          once: true,
-        },
-      })
     }, containerRef)
 
     return () => ctx.revert()
@@ -361,7 +404,7 @@ export default function Leaders() {
             领涨核心
           </h1>
           <p className="hero-subtitle font-body text-[1.0625rem] text-silver leading-relaxed max-w-[700px] mx-auto">
-            五只领涨股的深层投资逻辑拆解 — 从软银的AI生态投资到SK海力士的HBM帝国
+            美、日、韩三大市场核心贡献股深度拆解 — 实时跟踪对指数影响最大的龙头企业
           </p>
         </div>
 
@@ -380,10 +423,13 @@ export default function Leaders() {
       {error && <ErrorSection />}
       {data && (
         <>
-          {data.stocks.map((stock) => (
-            <StockCard key={stock.id} stock={stock} />
+          {data.indices.map((indexData, idx) => (
+            <IndexSection
+              key={indexData.indexSymbol}
+              indexData={indexData}
+              sectionIndex={idx}
+            />
           ))}
-          <ComparisonSection stocks={data.stocks} maxChange={data.maxChange} />
         </>
       )}
     </div>
