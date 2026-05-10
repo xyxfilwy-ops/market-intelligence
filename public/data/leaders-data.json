@@ -1,0 +1,96 @@
+{
+  "lastUpdated": "2026-05-08T07:00:00Z",
+  "stocks": [
+    {
+      "id": 1,
+      "name": "软银集团",
+      "nameEn": "SoftBank Group",
+      "code": "9984.JP",
+      "market": "日经225",
+      "change": 18.4,
+      "weight": "~8.4%",
+      "contribution": "~717日元",
+      "tag": "投资控股 · AI生态",
+      "logo": "/softbank-logo.svg",
+      "analysis": [
+        "OpenAI投资：旗下愿景基金深度布局OpenAI，直接受益于$250B Stargate项目",
+        "Arm Holdings：持有Arm 90%股权，Arm架构主导全球AI芯片设计底层",
+        "Golden Week rally：黄金周后补涨行情，日经225最大贡献股"
+      ],
+      "isMirror": false
+    },
+    {
+      "id": 2,
+      "name": "SK海力士",
+      "nameEn": "SK Hynix",
+      "code": "000660.KS",
+      "market": "KOSPI",
+      "change": 3.31,
+      "weight": "~18-22%",
+      "contribution": "~247点",
+      "tag": "存储芯片 · HBM龙头",
+      "logo": "/skhynix-logo.svg",
+      "analysis": [
+        "HBM垄断地位：全球HBM市占率57-62%，NVIDIA HBM4供货占比70%",
+        "利润爆发：毛利率79%，营业利润率72%创历史最高，产能售罄至2026年",
+        "技术壁垒：率先量产HBM3E 12Hi堆叠，领先三星与美光至少一代"
+      ],
+      "isMirror": true
+    },
+    {
+      "id": 3,
+      "name": "三星电子",
+      "nameEn": "Samsung Electronics",
+      "code": "005930.KS",
+      "market": "KOSPI",
+      "change": 2.07,
+      "weight": "~22-25%",
+      "contribution": "~155点",
+      "tag": "综合半导体 · 存储/代工",
+      "logo": "/samsung-logo.svg",
+      "analysis": [
+        "利润激增：Q1利润同比+756%，HBM4全球率先量产",
+        "市值突破：市值突破1万亿美元，DRAM价格暴涨90-95%",
+        "估值优势：Forward PE仅5.9x，全产业链优势覆盖存储、代工、手机、显示"
+      ],
+      "isMirror": false
+    },
+    {
+      "id": 4,
+      "name": "东京电子",
+      "nameEn": "Tokyo Electron",
+      "code": "8035.JP",
+      "market": "日经225",
+      "change": 9.0,
+      "weight": "~9.81%",
+      "contribution": "~424日元",
+      "tag": "半导体设备 · 刻蚀/沉积",
+      "logo": "/tokyo-electron-logo.svg",
+      "analysis": [
+        "设备龙头：全球半导体刻蚀/沉积设备领导者，3nm及以下工艺核心设备商",
+        "AI芯片驱动：先进制程沉积与刻蚀步骤增加，设备需求爆发式增长",
+        "指数映射效应：PHLX半导体指数上涨带动日经225半导体板块联动"
+      ],
+      "isMirror": true
+    },
+    {
+      "id": 5,
+      "name": "爱德万测试",
+      "nameEn": "Advantest",
+      "code": "6857.JP",
+      "market": "日经225",
+      "change": 6.8,
+      "weight": "~14.33%",
+      "contribution": "~527日元",
+      "tag": "半导体测试 · 核心设备",
+      "logo": "/advantest-logo.svg",
+      "analysis": [
+        "AI芯片测试刚需：NVIDIA H100/B200芯片ATE测试设备核心供应商",
+        "业绩上调：FY利润指引上调25%，CEO表示\"多年高增长周期 ahead\"",
+        "先进封装测试：CoWoS等先进封装技术推动测试设备需求量倍增"
+      ],
+      "isMirror": false
+    }
+  ],
+  "maxChange": 18.4
+}

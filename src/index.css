@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 4%;
+    --foreground: 40 9% 90%;
+    --card: 0 0% 8%;
+    --card-foreground: 40 9% 90%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 40 9% 90%;
+    --primary: 42 44% 58%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 40 9% 90%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 0 0% 42%;
+    --accent: 0 0% 8%;
+    --accent-foreground: 40 9% 90%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 23%;
+    --input: 0 0% 23%;
+    --ring: 42 44% 58%;
+    --radius: 0.625rem;
+    --sidebar-background: 0 0% 4%;
+    --sidebar-foreground: 40 9% 90%;
+    --sidebar-primary: 42 44% 58%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 0 0% 8%;
+    --sidebar-accent-foreground: 40 9% 90%;
+    --sidebar-border: 0 0% 23%;
+    --sidebar-ring: 42 44% 58%;
+
+    --gold: #C9A962;
+    --light-gold: #E8D5A3;
+    --platinum: #E8E4E0;
+    --silver: #B0B0B0;
+    --muted-color: #6A6A6A;
+    --dim: #3A3A3A;
+    --charcoal: #141414;
+    --obsidian: #0A0A0A;
+  }
+
+  body {
+    @apply bg-obsidian text-platinum font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
