@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -48,7 +48,7 @@ function useMarketData() {
 }
 
 /* ─── Hero Section ─── */
-function HeroSection() {
+function HeroSection({ data, loading }: { data: MarketData | null; loading: boolean }) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const labelRef = useRef<HTMLParagraphElement>(null)
   const titleRef = useRef<HTMLHeadingElement>(null)
@@ -67,6 +67,9 @@ function HeroSection() {
 
     gsap.to(bgRef.current, { scale: 1, duration: 6, ease: 'power2.out' })
   }, { scope: sectionRef })
+
+  const dateLabel = data ? formatDateLabel(data.lastUpdated) : (loading ? '数据加载中...' : '海外市场深度分析')
+  const subtitle = data ? generateHeroSubtitle(data.indices) : '全球市场动态监测，实时把握AI半导体产业链脉搏'
 
   return (
     <section
@@ -91,7 +94,7 @@ function HeroSection() {
           ref={labelRef}
           className="font-body text-[0.8125rem] text-muted tracking-[0.08em] uppercase mb-8 opacity-0 translate-y-5"
         >
-          2026年5月7日 — 8日 · 海外市场深度分析
+          {dateLabel} · 海外市场深度分析
         </p>
 
         <h1
@@ -116,7 +119,7 @@ function HeroSection() {
           ref={subtitleRef}
           className="font-body text-[1.0625rem] leading-[1.7] text-silver max-w-[720px] mx-auto opacity-0 translate-y-8"
         >
-          AI半导体超级周期驱动下的市场重估 —— 日经225创历史最大单日点数涨幅，全球CSP资本支出突破8,300亿美元
+          {subtitle}
         </p>
       </div>
 
@@ -218,7 +221,7 @@ function MarketPulseSection() {
             市场脉动
           </h2>
           <p className="font-body text-[0.9375rem] text-muted">
-            三大市场核心指数 · 2026年5月7日收盘
+            三大市场核心指数 · {data ? formatDateLabel(data.lastUpdated) : '最新收盘'}
           </p>
         </div>
 
@@ -252,12 +255,12 @@ function MarketPulseSection() {
               </div>
 
               <p className="font-body text-[0.9375rem] text-light-gold mb-4">
-                {idx.symbol === '^DJI' ? '盘中首破50,000点' : idx.symbol === '^GSPC' ? '从盘中历史纪录回落' : '纳指100逆势收涨+0.17%'}
+                {generateIndexComment(idx)}
               </p>
 
               <div className="pt-4 border-t border-dim">
                 <p className="font-body text-[0.8125rem] text-muted">
-                  {idx.symbol === '^DJI' ? '道指30只成分股中20只下跌' : idx.symbol === '^GSPC' ? '84%公司盈利超预期' : '大型科技股韧性显现'}
+                  {generateIndexSubComment(idx)}
                 </p>
               </div>
             </div>
@@ -279,12 +282,12 @@ function MarketPulseSection() {
               </div>
 
               <p className="font-body text-[0.9375rem] text-light-gold mb-4">
-                {nikkei.change >= 0 ? '创历史最大单日点数涨幅' : '单日大幅下跌'}
+                {generateIndexComment(nikkei)}
               </p>
 
               <div className="pt-4 border-t border-dim">
                 <p className="font-body text-[0.8125rem] text-muted">
-                  AI半导体超级周期驱动，盘中一度飙升至62,932.81
+                  {generateIndexSubComment(nikkei)}
                 </p>
               </div>
             </div>
@@ -305,12 +308,12 @@ function MarketPulseSection() {
               </div>
 
               <p className="font-body text-[0.8125rem] text-light-gold mb-4">
-                {kospi.change >= 0 ? '盘中创历史新高' : '盘中大幅波动'}
+                {generateIndexComment(kospi)}
               </p>
 
               <div className="pt-4 border-t border-dim">
                 <p className="font-body text-[0.8125rem] text-muted">
-                  SK海力士与三星电子双轮驱动
+                  {generateIndexSubComment(kospi)}
                 </p>
               </div>
             </div>
@@ -322,18 +325,89 @@ function MarketPulseSection() {
 }
 
 /* ─── Highlights Section ─── */
-function HighlightsSection() {
+function HighlightsSection({ data }: { data: MarketData | null }) {
   const sectionRef = useRef<HTMLDivElement>(null)
   const titleRef = useRef<HTMLDivElement>(null)
   const cardsRef = useRef<HTMLDivElement>(null)
 
-  const highlightData = [
-    { target: 18.4, suffix: '%', label: '软银集团单日涨幅', sub: 'OpenAI/Arm投资驱动', prefix: '' },
-    { target: 5.58, suffix: '%', label: '日经225单日涨幅', sub: '创历史最大单日点数涨幅', prefix: '' },
-    { target: 756, suffix: '%', label: '三星电子Q1利润增长', sub: '市值突破万亿美元', prefix: '' },
-    { target: 8300, suffix: '亿', label: '全球CSP资本支出', sub: '美元，AI基建竞赛白热化', prefix: '' },
-    { target: 62, suffix: '%', label: 'SK海力士HBM市占率', sub: '毛利率高达79%', prefix: '57-' },
-  ]
+  const highlightData = useMemo(() => {
+    if (!data || !data.indices.length) {
+      return [
+        { target: 0, suffix: '%', label: '数据加载中', sub: '等待市场数据更新', prefix: '' },
+      ]
+    }
+
+    const indices = data.indices
+    // Find biggest gainer and loser
+    const sorted = [...indices].sort((a, b) => b.changePercent - a.changePercent)
+    const topGainer = sorted[0]
+    const topLoser = sorted[sorted.length - 1]
+
+    const us = indices.filter(i => i.region === 'United States')
+    const usAvg = us.length ? us.reduce((s, i) => s + i.changePercent, 0) / us.length : 0
+
+    const items: Array<{ target: number; suffix: string; label: string; sub: string; prefix: string }> = []
+
+    if (topGainer && topGainer.changePercent > 0) {
+      items.push({
+        target: Math.abs(topGainer.changePercent),
+        suffix: '%',
+        label: `${topGainer.name}领涨`,
+        sub: `当日收盘 ${topGainer.change >= 0 ? '+' : ''}${topGainer.change.toFixed(2)}点`,
+        prefix: '+',
+      })
+    }
+
+    if (topLoser && topLoser.changePercent < 0 && topLoser.symbol !== topGainer.symbol) {
+      items.push({
+        target: Math.abs(topLoser.changePercent),
+        suffix: '%',
+        label: `${topLoser.name}领跌`,
+        sub: `当日收盘 ${topLoser.change.toFixed(2)}点`,
+        prefix: '-',
+      })
+    }
+
+    if (us.length) {
+      items.push({
+        target: Math.abs(usAvg),
+        suffix: '%',
+        label: '美股平均涨跌幅',
+        sub: `道指 / 标普 / 纳指综合表现`,
+        prefix: usAvg >= 0 ? '+' : '-',
+      })
+    }
+
+    const asia = indices.filter(i => i.region !== 'United States')
+    const asiaUp = asia.filter(i => i.changePercent > 0).length
+    const asiaDown = asia.filter(i => i.changePercent < 0).length
+    if (asia.length) {
+      items.push({
+        target: asiaUp,
+        suffix: '涨',
+        label: `亚洲市场 ${asiaUp}涨${asiaDown}跌`,
+        sub: '日韩市场收盘分化',
+        prefix: '',
+      })
+    }
+
+    // Volatility: biggest intraday range
+    const mostVolatile = [...indices].sort((a, b) =>
+      ((b.high - b.low) / b.previousClose * 100) - ((a.high - a.low) / a.previousClose * 100)
+    )[0]
+    if (mostVolatile) {
+      const range = ((mostVolatile.high - mostVolatile.low) / mostVolatile.previousClose * 100)
+      items.push({
+        target: range,
+        suffix: '%',
+        label: '最大日内振幅',
+        sub: `${mostVolatile.name} 高低点落差`,
+        prefix: '',
+      })
+    }
+
+    return items.slice(0, 5)
+  }, [data])
 
   useGSAP(() => {
     const ctx = gsap.context(() => {
@@ -514,13 +588,122 @@ function DeepDiveSection() {
   )
 }
 
+/* ─── Helpers ─── */
+function formatDateLabel(dateStr: string): string {
+  const d = new Date(dateStr)
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
+}
+
+function generateHeroSubtitle(indices: MarketData['indices']): string {
+  const nikkei = indices.find(i => i.symbol === '^N225')
+  const kospi = indices.find(i => i.symbol === '^KS11')
+  const us = indices.filter(i => i.region === 'United States')
+  const usAvg = us.length ? us.reduce((s, i) => s + i.changePercent, 0) / us.length : 0
+
+  const upIndices = indices.filter(i => i.changePercent > 0)
+  const downIndices = indices.filter(i => i.changePercent < 0)
+
+  if (upIndices.length === indices.length) {
+    return `全球市场普涨，${us[0]?.name || '美股'}与${nikkei?.name || '日经'}协同走强，AI产业链仍是跨市场核心主线`
+  }
+  if (downIndices.length === indices.length) {
+    return `全球主要市场同步调整，避险情绪阶段性升温，关注AI硬科技产业链的回调布局机会`
+  }
+  if (nikkei && nikkei.changePercent >= 1.5) {
+    return `日经225强势上涨${nikkei.changePercent.toFixed(2)}%，AI半导体超级周期持续驱动亚洲市场重估`
+  }
+  if (kospi && kospi.changePercent >= 1.5) {
+    return `KOSPI强势上涨${kospi.changePercent.toFixed(2)}%，韩国半导体双雄领涨大盘`
+  }
+  if (nikkei && nikkei.changePercent <= -1.5) {
+    return `日经225显著回调${Math.abs(nikkei.changePercent).toFixed(2)}%，短期获利回吐压力显现，中长期向上逻辑未变`
+  }
+  if (kospi && kospi.changePercent <= -1.5) {
+    return `KOSPI显著回调${Math.abs(kospi.changePercent).toFixed(2)}%，外资减持权重标的，关注存储芯片龙头韧性`
+  }
+  if (usAvg >= 1) {
+    return `美股全线走强，道指与纳指协同上涨，全球风险偏好持续回升`
+  }
+  if (usAvg <= -1) {
+    return `美股集体回调，避险情绪阶段性升温，关注AI产业链韧性`
+  }
+  return `全球主要市场收盘分化，${upIndices.length}涨${downIndices.length}跌，AI产业链仍是跨市场核心主线`
+}
+
+function generateIndexComment(idx: MarketData['indices'][0]): string {
+  const cp = idx.changePercent
+  if (idx.symbol === '^DJI') {
+    if (cp >= 1) return '道指成分股普涨，工业与金融板块协同发力'
+    if (cp >= 0.3) return '道指温和上涨，权重股表现分化'
+    if (cp >= -0.3) return '道指窄幅整理，等待方向选择'
+    if (cp >= -1) return '道指小幅回调，防御板块相对抗跌'
+    return '道指明显回落，关注下方支撑力度'
+  }
+  if (idx.symbol === '^GSPC') {
+    if (cp >= 1) return '标普500普涨，各行业板块共振上行'
+    if (cp >= 0.3) return '标普500温和收涨，大盘蓝筹稳健'
+    if (cp >= -0.3) return '标普500窄幅波动，市场观望情绪较浓'
+    if (cp >= -1) return '标普500小幅调整，成长股承压'
+    return '标普500显著回落，注意风险控制'
+  }
+  if (idx.symbol === '^IXIC') {
+    if (cp >= 1.5) return '纳指强势领涨，科技股风险偏好回升'
+    if (cp >= 0.5) return '纳指表现活跃，AI概念股受追捧'
+    if (cp >= -0.5) return '纳指窄幅震荡，科技股分化明显'
+    if (cp >= -1.5) return '纳指小幅回调，高估值板块承压'
+    return '纳指大幅回落，科技板块集体调整'
+  }
+  if (idx.symbol === '^N225') {
+    if (cp >= 1.5) return '日经225强势上攻，半导体设备股领涨'
+    if (cp >= 0.5) return '日经225稳步上行，出口型企业受益'
+    if (cp >= -0.5) return '日经225窄幅整理，等待美股指引'
+    if (cp >= -1.5) return '日经225小幅回调，获利盘兑现压力'
+    return '日经225显著回落，外资流出迹象显现'
+  }
+  if (idx.symbol === '^KS11') {
+    if (cp >= 1) return 'KOSPI放量上涨，半导体双雄领涨大盘'
+    if (cp >= 0.3) return 'KOSPI温和收涨，芯片股表现亮眼'
+    if (cp >= -0.3) return 'KOSPI横盘整理，市场等待催化剂'
+    if (cp >= -1) return 'KOSPI小幅调整，电池板块承压'
+    return 'KOSPI明显回落，外资减持权重标的'
+  }
+  return ''
+}
+
+function generateIndexSubComment(idx: MarketData['indices'][0]): string {
+  const cp = idx.changePercent
+  if (idx.symbol === '^DJI') {
+    if (cp >= 0) return '道指30只成分股中涨跌互现，金融与工业板块分化'
+    return '道指30只成分股中跌多涨少，周期性板块承压'
+  }
+  if (idx.symbol === '^GSPC') {
+    if (cp >= 0) return '标普11大板块多数收红，科技与通信服务领涨'
+    return '标普11大板块多数收跌，可选消费与房地产领跌'
+  }
+  if (idx.symbol === '^IXIC') {
+    if (cp >= 0) return '大型科技股韧性显现，半导体设备股持续强势'
+    return '高估值成长股承压，芯片设计龙头跌幅居前'
+  }
+  if (idx.symbol === '^N225') {
+    if (cp >= 0) return 'AI半导体超级周期驱动，外资持续净流入日本市场'
+    return '日元走强压制出口股，半导体板块获利回吐'
+  }
+  if (idx.symbol === '^KS11') {
+    if (cp >= 0) return 'SK海力士与三星电子双轮驱动，芯片股引领市场'
+    return '存储芯片股回调拖累大盘，外资净卖出权重标的'
+  }
+  return ''
+}
+
 /* ─── Home Page ─── */
 export default function Home() {
+  const { data, loading } = useMarketData()
+
   return (
     <div className="bg-obsidian">
-      <HeroSection />
+      <HeroSection data={data} loading={loading} />
       <MarketPulseSection />
-      <HighlightsSection />
+      <HighlightsSection data={data} />
       <DeepDiveSection />
     </div>
   )

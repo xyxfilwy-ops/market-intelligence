@@ -1,75 +1,127 @@
 {
-  "summary": "美股表现稳健，亚洲市场短期调整",
-  "factors": [
-    {
-      "name": "AI超级周期",
-      "impact": 5,
-      "detail": "全球CSP资本支出维持高位，AI芯片和HBM需求持续强劲，半导体产业链景气度处于历史高位"
+  "summary": "美股表现稳健，亚洲市场短期调整，全球分化格局延续",
+  "supercycle": {
+    "arguments": [
+      {
+        "title": "算力需求呈指数级增长",
+        "content": "全球九大CSP资本支出维持高位，AI芯片需求持续强劲。当前道指+0.86%、日经-0.19%、KOSPI+0.11%的收盘表现，反映市场对AI产业链的信心分化。"
+      },
+      {
+        "title": "HBM成为性能瓶颈与价值核心",
+        "content": "从HBM2E到HBM3E再到HBM4，每一代堆叠层数翻倍，带宽提升40%以上。SK海力士凭借与NVIDIA的深度绑定，建立了难以逾越的技术护城河。"
+      },
+      {
+        "title": "CSP资本支出创历史纪录",
+        "content": "微软、亚马逊、谷歌等云厂商2026年AI基建投资超过8,300亿美元，同比增长79%。这笔巨额资本支出正在创造半导体行业历史上最大的需求浪潮。"
+      }
+    ],
+    "stats": [
+      {
+        "value": "8,300亿",
+        "label": "美元CSP资本支出"
+      },
+      {
+        "value": "+79%",
+        "label": "同比增幅"
+      },
+      {
+        "value": "57-62%",
+        "label": "SK海力士HBM市占率"
+      }
+    ]
+  },
+  "geopolitics": {
+    "leftColumn": {
+      "title": "贸易摩擦与供应链重构",
+      "content": "美国可能进一步加征汽车/半导体关税，但日韩与AI供应链关系紧密，相对免疫。中国半导体自主化加速，对全球格局产生深远影响。",
+      "impacts": [
+        "关税不确定性：对道指工业股构成阶段性压力",
+        "供应链区域化：东亚半导体产业链地位进一步强化",
+        "技术封锁：倒逼中国半导体自主化进程加速"
+      ]
     },
-    {
-      "name": "美联储政策",
-      "impact": 4,
-      "detail": "市场对美联储政策预期持续影响全球资本流动，美元指数波动影响出口型企业盈利预期"
+    "rightColumn": {
+      "title": "美联储与全球流动性",
+      "content": "市场对美联储政策预期持续影响全球资本流动。美元指数波动直接影响出口型企业盈利预期和跨国资本配置。",
+      "data": [
+        {
+          "value": "+0.86%",
+          "label": "美股平均涨跌幅",
+          "color": "rise-green"
+        },
+        {
+          "value": "-0.19%",
+          "label": "日经225",
+          "color": "fall-red"
+        },
+        {
+          "value": "+0.11%",
+          "label": "KOSPI",
+          "color": "rise-green"
+        }
+      ]
     },
-    {
-      "name": "日韩市场调整",
-      "impact": 3,
-      "detail": "日经225回调(-0.19%)，短期获利回吐压力显现"
+    "summary": "美股韧性显现，亚洲市场进入阶段性整固，中长期向上逻辑未变。"
+  },
+  "capex": {
+    "total": 8300,
+    "unit": "亿美元",
+    "description": "2026年全球九大CSP（云服务提供商）AI相关资本支出预计达到8,300亿美元，这一数字相当于2024年全球半导体总产值的1.5倍。",
+    "data": [
+      {
+        "name": "Amazon",
+        "value": 2300,
+        "color": "#C9A962",
+        "desc": "AWS基础设施+自研芯片"
+      },
+      {
+        "name": "Microsoft",
+        "value": 1900,
+        "color": "#E8D5A3",
+        "desc": "Azure+OpenAI合作"
+      },
+      {
+        "name": "Google",
+        "value": 1850,
+        "color": "#B0B0B0",
+        "desc": "GCP+TPU生态"
+      },
+      {
+        "name": "Meta",
+        "value": 1350,
+        "color": "#8B7355",
+        "desc": "AI算力中心"
+      },
+      {
+        "name": "Oracle",
+        "value": 800,
+        "color": "#6A6A6A",
+        "desc": "云基础设施扩张"
+      },
+      {
+        "name": "Tesla/xAI",
+        "value": 500,
+        "color": "#4A4A4A",
+        "desc": "Dojo超算+自动驾驶"
+      },
+      {
+        "name": "Apple",
+        "value": 450,
+        "color": "#3A3A3A",
+        "desc": "Apple Intelligence"
+      },
+      {
+        "name": "NVIDIA",
+        "value": 400,
+        "color": "#2A2A2A",
+        "desc": "内部计算集群"
+      }
+    ],
+    "trend": {
+      "title": "资本支出趋势",
+      "content": "当前市场环境下，云厂商资本支出增速与股价表现出现分化。道指+0.86%、日经-0.19%、KOSPI+0.11%的收盘数据表明，资金正在从纯粹的概念炒作向有实际订单支撑的设备商和存储商集中。"
     },
-    {
-      "name": "地缘政治",
-      "impact": 3,
-      "detail": "全球贸易格局重塑，供应链安全成为各国政策优先考量"
-    }
-  ],
-  "cspCapex": [
-    {
-      "company": "Microsoft",
-      "amount": 1900,
-      "change": "+130%"
-    },
-    {
-      "company": "Amazon",
-      "amount": 2300,
-      "change": "+50%"
-    },
-    {
-      "company": "Google",
-      "amount": 1850,
-      "change": "+100%"
-    },
-    {
-      "company": "Meta",
-      "amount": 1350,
-      "change": "+85%"
-    },
-    {
-      "company": "Oracle",
-      "amount": 800,
-      "change": "+167%"
-    },
-    {
-      "company": "Tesla/xAI",
-      "amount": 500,
-      "change": "+200%"
-    },
-    {
-      "company": "Apple",
-      "amount": 450,
-      "change": "+60%"
-    },
-    {
-      "company": "NVIDIA",
-      "amount": 400,
-      "change": "+100%"
-    }
-  ],
-  "keyEvents": [
-    {
-      "date": "2026-05-10",
-      "title": "全球主要指数收盘：道指+0.86%，日经-0.19%，KOSPI+0.11%",
-      "impact": "市场格局持续演变"
-    }
-  ],
-  "lastUpdated": "2026-05-10T23:08:05+08:00"
+    "conclusion": "云服务商的8,300亿美元资本支出是整个产业链的终端买单方，它们的支出决定上游所有环节的需求强度。当前正处于资本开支扩张周期的中段，设备商和存储商将是最确定的受益者。"
+  },
+  "lastUpdated": "2026-05-11T00:41:59+08:00"
 }

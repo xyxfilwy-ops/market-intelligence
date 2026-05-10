@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -6,6 +6,20 @@ import { useGSAP } from '@gsap/react'
 import chipBg from '../assets/chip-abstract.jpg'
 
 gsap.registerPlugin(ScrollTrigger)
+
+/* ─── Data Loading Hook ─── */
+function useMarketData() {
+  const [data, setData] = useState<{ lastUpdated: string; indices: Array<{ symbol: string; name: string; changePercent: number; region: string }> } | null>(null)
+
+  useEffect(() => {
+    fetch('./data/market-data.json')
+      .then(r => r.json())
+      .then(d => setData(d))
+      .catch(() => setData(null))
+  }, [])
+
+  return data
+}
 
 const LAYERS = [
   {
@@ -86,9 +100,15 @@ const LAYERS = [
   },
 ]
 
+function getInvestmentDesc(nikkeiChange: number | undefined): string {
+  const trend = nikkeiChange !== undefined
+    ? (nikkeiChange >= 0 ? `当日日经225上涨${nikkeiChange.toFixed(2)}%，` : `当日日经225调整${Math.abs(nikkeiChange).toFixed(2)}%，`)
+    : ''
+  return `软银集团作为产业链的投资层，通过愿景基金持有全球AI生态的关键节点：OpenAI（生成式AI）、Arm（芯片架构）、波士顿动力（机器人）、以及数十家AI初创企业。它不直接参与任何一层的产品竞争，却在每一层都有战略投资布局。${trend}市场对这种"全栈AI投资"模式的认可持续强化。`
+}
+
 const INVESTMENT = {
   title: '投资层: 软银集团',
-  desc: '软银集团作为产业链的投资层，通过愿景基金持有全球AI生态的关键节点：OpenAI（生成式AI）、Arm（芯片架构）、波士顿动力（机器人）、以及数十家AI初创企业。它不直接参与任何一层的产品竞争，却在每一层都有战略投资布局。+18.4%的涨幅，正是市场对这种"全栈AI投资"模式的认可。',
   portfolio: [
     { name: 'OpenAI', role: '生成式AI' },
     { name: 'Arm', role: '芯片架构' },
@@ -387,7 +407,7 @@ function InvestmentStar() {
         软银集团
       </text>
       <text x={cx} y={cy + 12} textAnchor="middle" fill="#E8E4E0" fontSize="10" fontFamily="'JetBrains Mono', monospace">
-        +18.4%
+        愿景基金
       </text>
     </svg>
   )
@@ -395,6 +415,12 @@ function InvestmentStar() {
 
 export default function Chain() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const marketData = useMarketData()
+  const nikkei = marketData?.indices.find(i => i.symbol === '^N225')
+  const investmentDesc = getInvestmentDesc(nikkei?.changePercent)
+  const chainSummary = nikkei
+    ? `全球AI半导体产业链已形成清晰的价值流转路径：云服务商的大规模资本支出驱动芯片设计厂商订单爆发，进而拉动HBM存储、半导体设备和晶圆代工的全链条需求。软银集团作为投资层，横跨整个链条捕获价值。当前日经225${nikkei.changePercent >= 0 ? '上涨' : '调整'}${Math.abs(nikkei.changePercent).toFixed(2)}%，反映市场对全产业链的系统性${nikkei.changePercent >= 0 ? '重估' : '再定价'}。`
+    : '全球AI半导体产业链已形成清晰的价值流转路径：云服务商的资本支出驱动芯片设计厂商订单爆发，进而拉动HBM存储、半导体设备和晶圆代工的全链条需求。软银集团作为投资层，横跨整个链条捕获价值。'
 
   useGSAP(() => {
     const ctx = gsap.context(() => {
@@ -622,7 +648,7 @@ export default function Chain() {
           </h2>
 
           <p className="investment-detail-fade font-body text-[1.0625rem] text-silver leading-[1.8] mb-12 opacity-0">
-            {INVESTMENT.desc}
+            {investmentDesc}
           </p>
 
           <div className="star-node opacity-0">
@@ -641,7 +667,7 @@ export default function Chain() {
           <div className="chain-summary-line h-[1px] bg-gold mx-auto mb-8" style={{ width: 0, opacity: 0.6 }} />
 
           <p className="chain-summary-text font-body text-[1.0625rem] text-platinum leading-[1.9] opacity-0">
-            全球AI半导体产业链已形成清晰的价值流转路径：云服务商的8,300亿美元资本支出 → 芯片设计厂商的订单爆发 → HBM存储的技术垄断 → 半导体设备的扩产需求 → 晶圆代工的产能扩张。软银集团作为投资层，横跨整个链条捕获价值。这不是单一环节的景气，而是全产业链的系统性重估。
+            {chainSummary}
           </p>
         </div>
       </section>
