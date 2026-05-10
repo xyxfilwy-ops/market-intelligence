@@ -101,7 +101,7 @@ function Counter({ target, suffix = '', decimals = 2 }: CounterProps) {
 }
 
 /* ─── Stock Card ─── */
-function StockCard({ stock, maxChange }: { stock: StockData; maxChange: number }) {
+function StockCard({ stock }: { stock: StockData }) {
   return (
     <section
       className={`stock-card py-20 ${stock.isMirror ? 'bg-charcoal' : 'bg-obsidian'}`}
@@ -378,7 +378,7 @@ export default function Leaders() {
       {data && (
         <>
           {data.stocks.map((stock) => (
-            <StockCard key={stock.id} stock={stock} maxChange={data.maxChange} />
+            <StockCard key={stock.id} stock={stock} />
           ))}
           <ComparisonSection stocks={data.stocks} maxChange={data.maxChange} />
         </>
