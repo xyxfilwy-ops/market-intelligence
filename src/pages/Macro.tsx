@@ -63,7 +63,7 @@ function useMacroData() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/data/macro-data.json')
+    fetch('./data/macro-data.json')
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false) })
       .catch(e => { setError(e.message); setLoading(false) })

@@ -12,7 +12,7 @@ export default function LastUpdated() {
   const [meta, setMeta] = useState<MetaData | null>(null)
 
   useEffect(() => {
-    fetch('/data/meta.json')
+    fetch('./data/meta.json')
       .then(r => r.json())
       .then(d => setMeta(d))
       .catch(() => setMeta(null))

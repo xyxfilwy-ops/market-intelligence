@@ -35,7 +35,7 @@ function useLeadersData() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/data/leaders-data.json')
+    fetch('./data/leaders-data.json')
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false) })
       .catch(e => { setError(e.message); setLoading(false) })
