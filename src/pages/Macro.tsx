@@ -4,6 +4,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Sector } from 'recharts'
+import macroBg from '../../assets/macro-bg.jpg'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -432,7 +433,7 @@ export default function Macro() {
       <section className="relative w-full overflow-hidden" style={{ height: '60vh', minHeight: '500px' }}>
         <div
           className="macro-hero-bg absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(./macro-bg.jpg)', transformOrigin: 'center center' }}
+          style={{ backgroundImage: `url(${macroBg})`, transformOrigin: 'center center' }}
         />
         <div className="absolute inset-0" style={{ backgroundColor: 'rgba(10,10,10,0.5)' }} />
         <div className="relative z-10 max-w-[900px] mx-auto px-6 md:px-20 h-full flex flex-col justify-center">

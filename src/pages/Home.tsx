@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
+import heroBg from '../../assets/hero-bg.jpg'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -78,7 +79,7 @@ function HeroSection() {
         style={{ transform: 'scale(0.95)' }}
       >
         <img
-          src="./hero-bg.jpg"
+          src={heroBg}
           alt=""
           className="w-full h-full object-cover"
         />
