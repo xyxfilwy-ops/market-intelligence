@@ -77,13 +77,106 @@ function useMarketData() {
   return data
 }
 
+const FALLBACK_CHAIN_DATA: ChainData = {
+  lastUpdated: new Date().toISOString(),
+  layers: [
+    {
+      id: '01',
+      title: '芯片设计',
+      short: '设计',
+      companies: [
+        { name: 'NVIDIA', label: 'AI计算霸主', highlight: true },
+        { name: 'AMD', label: '追赶者', highlight: false },
+      ],
+      desc: 'NVIDIA凭借Blackwell架构和CUDA生态持续巩固AI训练市场主导地位，AMD通过MI350系列在推理市场取得突破。AI芯片需求持续强劲，设计层景气度维持高位。',
+      bg: 'obsidian',
+      layout: 'data-left',
+      marketSize: 'AI芯片市场: 1,800亿美元',
+    },
+    {
+      id: '02',
+      title: 'HBM存储',
+      short: '存储',
+      companies: [
+        { name: 'SK海力士', label: '市占率57-62%', highlight: true },
+        { name: '三星电子', label: '追赶者', highlight: false },
+        { name: '美光', label: '~10%', highlight: false },
+      ],
+      desc: 'HBM供应持续紧张，SK海力士凭借与NVIDIA的深度绑定维持技术领先。AI内存价格持续上行，HBM3E和即将量产的HBM4推动存储厂商毛利率扩张，存储层成为AI产业链的瓶颈与价值核心。',
+      bg: 'charcoal',
+      layout: 'mirror',
+      stats: [
+        { value: '57-62%', label: 'SK海力士市占率' },
+        { value: '79%', label: 'SK海力士毛利率' },
+      ],
+    },
+    {
+      id: '03',
+      title: '半导体设备',
+      short: '设备',
+      companies: [
+        { name: '东京电子', label: '刻蚀龙头', highlight: true },
+        { name: '爱德万测试', label: '测试核心', highlight: true },
+        { name: 'ASML', label: '光刻垄断', highlight: false },
+        { name: 'Applied Materials', label: '沉积巨头', highlight: false },
+      ],
+      desc: '晶圆厂扩产周期持续，东京电子和爱德万测试订单创历史新高。AI芯片产能扩张拉动设备投资，设备层是AI芯片量产的前提条件。',
+      bg: 'obsidian',
+      layout: 'data-left',
+      stats: [
+        { value: '#1', label: '东京电子刻蚀市占率' },
+        { value: '#1', label: '爱德万SoC测试市占率' },
+      ],
+    },
+    {
+      id: '04',
+      title: '晶圆代工',
+      short: '代工',
+      companies: [
+        { name: '台积电', label: '先进制程垄断', highlight: false },
+        { name: '三星代工', label: '追赶者', highlight: false },
+        { name: 'Intel Foundry', label: '破局者', highlight: false },
+      ],
+      desc: '台积电3nm产能满载，先进制程需求强劲。foundry市场供不应求，晶圆代工层成为芯片从设计到物理实现的关键桥梁。',
+      bg: 'charcoal',
+      layout: 'mirror',
+    },
+    {
+      id: '05',
+      title: '云服务商',
+      short: '云服务',
+      companies: [
+        { name: '微软 Azure', label: '最大买家', highlight: true },
+        { name: '亚马逊 AWS', label: '自研芯片', highlight: false },
+        { name: '谷歌 GCP', label: 'TPU生态', highlight: false },
+        { name: 'Meta', label: 'AI算力中心', highlight: false },
+      ],
+      desc: '云厂商资本支出维持高位，微软Azure、亚马逊AWS、谷歌GCP三家主导全球云市场。AI基础设施投资竞赛白热化，云服务层是产业链的终端买单方。',
+      bg: 'obsidian',
+      layout: 'data-left',
+      bigNumber: { value: '8,300亿', label: '美元资本支出' },
+    },
+  ],
+  investment: {
+    title: '投资层: 软银集团',
+    desc: '软银集团作为产业链的投资层，通过愿景基金持有全球AI生态的关键节点：OpenAI（生成式AI）、Arm（芯片架构）、波士顿动力（机器人）、以及数十家AI初创企业。它不直接参与任何一层的产品竞争，却在每一层都有战略投资布局。',
+    portfolio: [
+      { name: 'OpenAI', role: '生成式AI' },
+      { name: 'Arm', role: '芯片架构' },
+      { name: '波士顿动力', role: '机器人' },
+      { name: '其他AI投资', role: '初创组合' },
+    ],
+  },
+  summary: '全球AI半导体产业链已形成清晰的价值流转路径：云服务商的大规模资本支出驱动芯片设计厂商订单爆发，进而拉动HBM存储、半导体设备和晶圆代工的全链条需求。软银集团作为投资层，横跨整个链条捕获价值。',
+}
+
 function useChainData() {
   const [data, setData] = useState<ChainData | null>(null)
   useEffect(() => {
     fetch('./data/chain-data.json')
       .then(r => r.json())
       .then(d => setData(d))
-      .catch(() => setData(null))
+      .catch(() => setData(FALLBACK_CHAIN_DATA))
   }, [])
   return data
 }

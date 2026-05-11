@@ -10,10 +10,30 @@ const navLinks = [
   { path: '/chain', label: '产业链地图' },
 ]
 
+function useCloseDate() {
+  const [dateStr, setDateStr] = useState('数据更新中')
+  useEffect(() => {
+    fetch('./data/market-data.json')
+      .then(r => r.json())
+      .then((d: { lastUpdated?: string }) => {
+        if (d.lastUpdated) {
+          const dt = new Date(d.lastUpdated)
+          const y = dt.getFullYear()
+          const m = dt.getMonth() + 1
+          const day = dt.getDate()
+          setDateStr(`数据截止: ${y}年${m}月${day}日收盘`)
+        }
+      })
+      .catch(() => {})
+  }, [])
+  return dateStr
+}
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
+  const closeDate = useCloseDate()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32)
@@ -113,7 +133,7 @@ export default function Navbar() {
         </div>
         <div className="absolute bottom-10 left-0 right-0 text-center">
           <p className="font-body text-xs text-muted tracking-[0.15em] uppercase">
-            数据截止: 2026年5月7日收盘
+            {closeDate}
           </p>
         </div>
       </div>
