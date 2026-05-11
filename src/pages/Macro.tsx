@@ -25,6 +25,12 @@ interface RingNodes {
 interface MacroData {
   lastUpdated: string
   ringNodes?: RingNodes
+  newsHighlights?: Record<string, Array<{
+    title: string
+    summary: string
+    pubDate: string
+    symbol: string
+  }>>
   supercycle: {
     arguments: Array<{
       title: string
@@ -601,7 +607,30 @@ export default function Macro() {
         </div>
       </section>
 
-      {/* ===== Section 5: Macro Summary ===== */}
+      {/* ===== Section 5: Live News Highlights ===== */}
+      {data.newsHighlights && Object.keys(data.newsHighlights).length > 0 && (
+        <section className="news-section py-[100px] bg-obsidian">
+          <div className="max-w-[1200px] mx-auto px-6 md:px-20">
+            <p className="font-body text-[0.8125rem] text-gold tracking-[0.1em] mb-3">LIVE NEWS</p>
+            <h2 className="font-display text-[2.25rem] text-platinum mb-10">本期关键新闻</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Object.entries(data.newsHighlights).map(([theme, items]) => (
+                <div key={theme} className="border border-muted/30 rounded-lg p-6">
+                  <p className="font-body text-[0.75rem] text-gold tracking-wider mb-4">{theme}</p>
+                  {items.map((n, i) => (
+                    <div key={i} className="mb-4 pb-4 border-b border-muted/20 last:border-0 last:mb-0 last:pb-0">
+                      <p className="font-body text-[0.9375rem] text-platinum leading-[1.5] mb-1">{n.title}</p>
+                      <p className="font-body text-[0.75rem] text-muted">{n.symbol} · {n.pubDate ? n.pubDate.slice(0, 10) : ''}</p>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ===== Section 6: Macro Summary ===== */}
       <section className="summary-section py-[100px] bg-charcoal">
         <div className="max-w-[900px] mx-auto px-6 md:px-20 text-center">
           <h2 className="summary-title font-display text-[2.25rem] text-platinum leading-[1.2] tracking-[-0.01em] mb-8 opacity-0">

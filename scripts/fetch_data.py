@@ -425,9 +425,119 @@ def get_leaders_data(indices_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]
     return results
 
 
-def get_macro_data(indices_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+SUPERCYCLE_ARG_TEMPLATES = {
+    "hbm": {
+        "hot":   "HBM新闻热度极高，本周{count}条相关报道。从HBM2E到HBM3E再到HBM4，每一代堆叠层数翻倍，带宽提升40%以上。SK海力士凭借与NVIDIA的深度绑定，建立了难以逾越的技术护城河。",
+        "normal": "HBM成为AI计算性能瓶颈与价值核心。SK海力士凭借与NVIDIA的深度绑定，建立了难以逾越的技术护城河，三星正全力追赶。",
+        "cool":   "HBM市场进入相对平稳期。SK海力士维持市占率领先，行业焦点转向HBM4量产进度。",
+    },
+    "capex": {
+        "hot":    "本周共{count}条CSP资本开支新闻，云厂商投资竞赛白热化。微软、亚马逊、谷歌2026年AI基建投资超过8,300亿美元，同比增长79%。",
+        "normal": "全球九大CSP资本支出维持高位，2026年AI基建投资预计超8,300亿美元，同比增长79%。",
+        "cool":   "CSP资本开支预期趋稳，市场关注从投入转向产出。",
+    },
+}
+
+
+def _pick_arg(theme_key: str, news_count: int) -> str:
+    bucket = "hot" if news_count >= 3 else "normal" if news_count >= 1 else "cool"
+    tmpl = SUPERCYCLE_ARG_TEMPLATES[theme_key][bucket]
+    return tmpl.format(count=news_count)
+
+
+GEO_LEFT_TEMPLATES = {
+    "high": {
+        "title": "贸易摩擦升级",
+        "content": "本周地缘相关新闻{count}条，关税与出口管制成为市场焦点。美国可能进一步加征汽车/半导体关税，中国半导体自主化加速。",
+        "impacts": [
+            "关税不确定性：对道指工业股构成阶段性压力",
+            "供应链区域化：东亚半导体产业链地位进一步强化",
+            "技术封锁：倒逼中国半导体自主化进程加速",
+            "全球资本流向避险资产",
+        ],
+    },
+    "medium": {
+        "title": "贸易摩擦与供应链重构",
+        "content": "地缘相关新闻{count}条，关税政策仍有不确定性，但日韩与AI供应链关系紧密，相对免疫。中国半导体自主化持续推进。",
+        "impacts": [
+            "关税不确定性：对道指工业股构成阶段性压力",
+            "供应链区域化：东亚半导体产业链地位进一步强化",
+            "技术封锁：倒逼中国半导体自主化进程加速",
+        ],
+    },
+    "low": {
+        "title": "供应链重构",
+        "content": "近期地缘新闻较少，市场关注点转向基本面。东亚半导体产业链地位稳固，中国半导体自主化长期推进中。",
+        "impacts": [
+            "供应链区域化：东亚半导体产业链地位进一步强化",
+            "技术自主：中国半导体自主化进程稳步推进",
+        ],
+    },
+}
+
+
+def _build_geo_left(news_highlights: Dict[str, List[Dict[str, str]]]) -> Dict[str, Any]:
+    cnt = len(news_highlights.get("地缘/关税", []))
+    bucket = "high" if cnt >= 3 else "medium" if cnt >= 1 else "low"
+    t = GEO_LEFT_TEMPLATES[bucket]
+    return {
+        "title": t["title"],
+        "content": t["content"].format(count=cnt),
+        "impacts": t["impacts"],
+    }
+
+
+def generate_llm_analysis(indices_data: List[Dict[str, Any]], news_highlights: Dict[str, List[Dict[str, str]]], layer_title: str = None) -> str | None:
+    """Use Moonshot AI (Kimi) to generate a dynamic analysis paragraph."""
+    api_key = os.getenv("MOONSHOT_API_KEY")
+    if not api_key:
+        return None
+    try:
+        from openai import OpenAI
+    except ImportError:
+        logger.warning("openai not installed, skipping LLM analysis")
+        return None
+
+    client = OpenAI(api_key=api_key, base_url="https://api.moonshot.cn/v1")
+    news_text = "\n".join([
+        f"- [{theme}] {n['title']}"
+        for theme, items in news_highlights.items()
+        for n in items
+    ]) or "暂无近期新闻"
+    market_text = "\n".join([
+        f"- {i['name']}: {i['changePercent']:+.2f}% (close {i['close']})"
+        for i in indices_data
+    ])
+    target = layer_title or "全球AI半导体宏观格局"
+    prompt = f"""你是资深金融分析师。基于以下实时数据，为"{target}"撰写一段150字以内的中文分析，要求引用具体新闻和数据点，语言专业凝练。
+
+[今日行情]
+{market_text}
+
+[过去48小时关键新闻]
+{news_text}
+
+只输出分析正文，不要标题、不要引言、不要总结性套话。
+"""
+    try:
+        resp = client.chat.completions.create(
+            model="moonshot-v1-8k",
+            max_tokens=400,
+            temperature=0.3,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text = resp.choices[0].message.content.strip()
+        logger.info(f"LLM analysis generated for '{target}' ({len(text)} chars)")
+        return text
+    except Exception as e:
+        logger.warning(f"LLM analysis failed: {e}")
+        return None
+
+
+def get_macro_data(indices_data: List[Dict[str, Any]], news_highlights: Dict[str, List[Dict[str, str]]] = None) -> Dict[str, Any]:
     """Generate dynamic macro data based on real-time market data.
     Returns structure compatible with the frontend Macro.tsx component."""
+    news_highlights = news_highlights or {}
     index_map = {idx["symbol"]: idx for idx in indices_data}
 
     us_indices = [idx for idx in indices_data if idx["region"] == "United States"]
@@ -438,6 +548,10 @@ def get_macro_data(indices_data: List[Dict[str, Any]]) -> Dict[str, Any]:
     us_avg_change = sum(idx.get("changePercent", 0) for idx in us_indices) / len(us_indices) if us_indices else 0
     nikkei_change = nikkei.get("changePercent", 0)
     kospi_change = kospi.get("changePercent", 0)
+
+    # News-driven dynamic args
+    hbm_count = len(news_highlights.get("HBM/存储", []))
+    capex_count = len(news_highlights.get("AI Capex", []))
 
     asia_up = nikkei_change >= 0 and kospi_change >= 0
     us_up = us_avg_change >= 0
@@ -461,7 +575,7 @@ def get_macro_data(indices_data: List[Dict[str, Any]]) -> Dict[str, Any]:
     else:
         geo_summary = "全球市场同步承压，建议关注回调后的布局机会。"
 
-    return {
+    result = {
         "summary": summary,
         "ringNodes": {
             "center": {"label": "AI芯片", "r": 50},
@@ -484,11 +598,11 @@ def get_macro_data(indices_data: List[Dict[str, Any]]) -> Dict[str, Any]:
                 },
                 {
                     "title": "HBM成为性能瓶颈与价值核心",
-                    "content": "从HBM2E到HBM3E再到HBM4，每一代堆叠层数翻倍，带宽提升40%以上。SK海力士凭借与NVIDIA的深度绑定，建立了难以逾越的技术护城河。",
+                    "content": _pick_arg("hbm", hbm_count),
                 },
                 {
                     "title": "CSP资本支出创历史纪录",
-                    "content": "微软、亚马逊、谷歌等云厂商2026年AI基建投资超过8,300亿美元，同比增长79%。这笔巨额资本支出正在创造半导体行业历史上最大的需求浪潮。",
+                    "content": _pick_arg("capex", capex_count),
                 },
             ],
             "stats": [
@@ -498,15 +612,7 @@ def get_macro_data(indices_data: List[Dict[str, Any]]) -> Dict[str, Any]:
             ],
         },
         "geopolitics": {
-            "leftColumn": {
-                "title": "贸易摩擦与供应链重构",
-                "content": "美国可能进一步加征汽车/半导体关税，但日韩与AI供应链关系紧密，相对免疫。中国半导体自主化加速，对全球格局产生深远影响。",
-                "impacts": [
-                    "关税不确定性：对道指工业股构成阶段性压力",
-                    "供应链区域化：东亚半导体产业链地位进一步强化",
-                    "技术封锁：倒逼中国半导体自主化进程加速",
-                ],
-            },
+            "leftColumn": _build_geo_left(news_highlights),
             "rightColumn": {
                 "title": "美联储与全球流动性",
                 "content": "市场对美联储政策预期持续影响全球资本流动。美元指数波动直接影响出口型企业盈利预期和跨国资本配置。",
@@ -539,6 +645,14 @@ def get_macro_data(indices_data: List[Dict[str, Any]]) -> Dict[str, Any]:
             "conclusion": "云服务商的8,300亿美元资本支出是整个产业链的终端买单方，它们的支出决定上游所有环节的需求强度。当前正处于资本开支扩张周期的中段，设备商和存储商将是最确定的受益者。",
         },
     }
+
+    # Override summary with LLM-generated text if available
+    llm_summary = generate_llm_analysis(indices_data, news_highlights)
+    if llm_summary:
+        result["summary"] = llm_summary
+        result["llmGenerated"] = True
+
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -752,6 +866,97 @@ def fetch_company_news(symbols: List[str], max_age_hours: int = 48) -> List[Dict
     return deduped
 
 
+RSS_FEEDS = [
+    ("Yahoo Finance", "https://finance.yahoo.com/news/rssindex"),
+    ("MarketWatch", "http://feeds.marketwatch.com/marketwatch/topstories/"),
+    ("Reuters Tech", "https://feeds.reuters.com/reuters/technologyNews"),
+    ("Nikkei Asia", "https://asia.nikkei.com/rss/feed/nar"),
+    ("SeekingAlpha", "https://seekingalpha.com/market_currents.xml"),
+]
+
+
+def fetch_rss_news(max_age_hours: int = 48) -> List[Dict[str, str]]:
+    """Fetch recent news from RSS feeds."""
+    try:
+        import feedparser
+    except ImportError:
+        logger.warning("feedparser not installed, skipping RSS sources")
+        return []
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=max_age_hours)
+    out = []
+    for source, url in RSS_FEEDS:
+        try:
+            feed = feedparser.parse(url)
+            for entry in feed.entries[:20]:
+                pub = entry.get("published_parsed") or entry.get("updated_parsed")
+                if pub:
+                    pub_dt = datetime(*pub[:6], tzinfo=timezone.utc)
+                    if pub_dt < cutoff:
+                        continue
+                out.append({
+                    "symbol": source,
+                    "title": entry.get("title", ""),
+                    "summary": entry.get("summary", "")[:300],
+                    "pubDate": entry.get("published", ""),
+                })
+        except Exception as e:
+            logger.warning(f"RSS fetch failed for {source}: {e}")
+    return out
+
+
+# ---------------------------------------------------------------------------
+# News Theme Classification
+# ---------------------------------------------------------------------------
+NEWS_THEME_KEYWORDS = {
+    "AI Capex":   ["capex", "capital expenditure", "data center", "infrastructure", "spending", "investment"],
+    "HBM/存储":   ["HBM", "memory", "DRAM", "Hynix", "Samsung memory", "storage", "DDR"],
+    "AI芯片":     ["AI chip", "Blackwell", "Nvidia", "AMD", "GPU", "inference", "training", "CUDA"],
+    "地缘/关税":  ["tariff", "trade", "sanction", "export control", "China chip", "geopolitic", "trade war"],
+    "货币政策":   ["Fed", "rate", "inflation", "CPI", "Powell", "yields", "interest rate"],
+}
+
+TICKERS_FOR_NEWS = [
+    "NVDA", "AMD", "MSFT", "AMZN", "GOOGL", "META", "AAPL", "TSM", "ASML",
+    "005930.KS", "000660.KS", "8035.T", "6857.T", "9984.T", "MU", "INTC",
+]
+
+
+def get_news_highlights(max_per_theme: int = 3) -> Dict[str, List[Dict[str, str]]]:
+    """Fetch and classify news into thematic buckets (yf + RSS)."""
+    yf_news = fetch_company_news(TICKERS_FOR_NEWS, max_age_hours=48)
+    rss_news = fetch_rss_news(max_age_hours=48)
+    raw = yf_news + rss_news
+    logger.info(f"Total news items for classification: yf={len(yf_news)}, rss={len(rss_news)}")
+    by_theme: Dict[str, List[Dict[str, str]]] = {t: [] for t in NEWS_THEME_KEYWORDS}
+    for n in raw:
+        text = (n["title"] + " " + n.get("summary", "")).lower()
+        matched = False
+        for theme, kws in NEWS_THEME_KEYWORDS.items():
+            if any(kw.lower() in text for kw in kws):
+                if len(by_theme[theme]) < max_per_theme:
+                    by_theme[theme].append({
+                        "title": n["title"],
+                        "summary": n.get("summary", "")[:200],
+                        "pubDate": n.get("pubDate", ""),
+                        "symbol": n.get("symbol", ""),
+                    })
+                matched = True
+                break
+        # Also try secondary match if no primary match
+        if not matched:
+            for theme, kws in NEWS_THEME_KEYWORDS.items():
+                if any(kw.lower() in text for kw in kws):
+                    if len(by_theme[theme]) < max_per_theme:
+                        by_theme[theme].append({
+                            "title": n["title"],
+                            "summary": n.get("summary", "")[:200],
+                            "pubDate": n.get("pubDate", ""),
+                            "symbol": n.get("symbol", ""),
+                        })
+                    break
+    return {k: v for k, v in by_theme.items() if v}
+
+
 def analyze_layer_news(layer: Dict[str, Any], news_items: List[Dict[str, str]], index_change: float) -> str:
     """Pick the best description template based on news keywords and market direction."""
     direction = "up" if index_change >= 0.5 else "down" if index_change <= -0.5 else "neutral"
@@ -775,8 +980,9 @@ def analyze_layer_news(layer: Dict[str, Any], news_items: List[Dict[str, str]], 
     return best_template
 
 
-def get_chain_data(indices_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+def get_chain_data(indices_data: List[Dict[str, Any]], news_highlights: Dict[str, List[Dict[str, str]]] = None) -> Dict[str, Any]:
     """Generate dynamic chain data with news-driven descriptions."""
+    news_highlights = news_highlights or {}
     index_map = {idx["symbol"]: idx for idx in indices_data}
     nikkei = index_map.get("^N225", {})
     nikkei_change = nikkei.get("changePercent", 0)
@@ -800,6 +1006,14 @@ def get_chain_data(indices_data: List[Dict[str, Any]]) -> Dict[str, Any]:
             related_change = nikkei_change
 
         desc = analyze_layer_news(layer_cfg, news, related_change)
+
+        # Optional LLM override for layer description
+        llm_desc = generate_llm_analysis(
+            indices_data, news_highlights,
+            layer_title=f"AI半导体产业链 - {layer_cfg['title']}"
+        )
+        if llm_desc:
+            desc = llm_desc
 
         layer_out: Dict[str, Any] = {
             "id": layer_cfg["id"],
@@ -1216,18 +1430,28 @@ def main():
     except Exception as e:
         logger.error(f"Error enriching market data: {e}")
 
+    # --- 3.5 Fetch and classify news highlights ---
+    try:
+        news_highlights = get_news_highlights()
+        logger.info(f"Classified news into {len(news_highlights)} themes")
+    except Exception as e:
+        logger.error(f"Error fetching news highlights: {e}")
+        news_highlights = {}
+
     # --- 4. Build macro data (dynamic, based on real-time index data) ---
     try:
-        macro_data = get_macro_data(indices_data)
+        macro_data = get_macro_data(indices_data, news_highlights)
         macro_data["lastUpdated"] = ts
+        macro_data["newsHighlights"] = news_highlights
         logger.info("Built macro data")
     except Exception as e:
         logger.error(f"Error building macro data: {e}")
-        macro_data = {"lastUpdated": ts, "summary": "数据生成中", "factors": [], "cspCapex": [], "keyEvents": []}
+        macro_data = {"lastUpdated": ts, "summary": "数据生成中", "factors": [], "cspCapex": [], "keyEvents": [], "newsHighlights": {}}
 
     # --- 5. Build chain data (news-driven dynamic descriptions) ---
     try:
-        chain_data = get_chain_data(indices_data)
+        chain_data = get_chain_data(indices_data, news_highlights)
+        chain_data["newsHighlights"] = news_highlights
         logger.info("Built chain data with news-driven descriptions")
     except Exception as e:
         logger.error(f"Error building chain data: {e}")
