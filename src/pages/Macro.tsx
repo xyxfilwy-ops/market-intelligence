@@ -22,62 +22,48 @@ interface RingNodes {
   outer: RingNode[]
 }
 
+interface NewsItem {
+  title: string
+  summary: string
+  pubDate: string
+  symbol: string
+}
+
 interface MacroData {
   lastUpdated: string
+  llmGenerated?: boolean
+  llmCached?: boolean
   ringNodes?: RingNodes
-  newsHighlights?: Record<string, Array<{
-    title: string
-    summary: string
-    pubDate: string
-    symbol: string
-  }>>
+  newsHighlights?: Record<string, NewsItem[]>
   supercycle: {
-    arguments: Array<{
-      title: string
-      content: string
-    }>
-    stats: Array<{
-      value: string
-      label: string
-    }>
+    arguments: Array<{ title: string; content: string }>
+    stats: Array<{ value: string; label: string }>
   }
   geopolitics: {
-    leftColumn: {
-      title: string
-      content: string
-      impacts: string[]
-    }
-    rightColumn: {
-      title: string
-      content: string
-      data: Array<{
-        value: string
-        label: string
-        color?: string
-      }>
-    }
+    leftColumn: { title: string; content: string; impacts: string[] }
+    rightColumn: { title: string; content: string; data: Array<{ value: string; label: string; color?: string }> }
     summary: string
   }
   capex: {
     total: number
     unit: string
     description: string
-    data: Array<{
-      name: string
-      value: number
-      color: string
-      desc: string
-    }>
-    trend: {
-      title: string
-      content: string
-    }
+    data: Array<{ name: string; value: number; color: string; desc: string }>
+    trend: { title: string; content: string }
     conclusion: string
   }
   summary: string
 }
 
-/* ─── Data Loading Hook ─── */
+interface MarketIndex {
+  name: string
+  symbol: string
+  close: number
+  changePercent: number
+  trend: string
+}
+
+/* ─── Data Loading Hooks ─── */
 function useMacroData() {
   const [data, setData] = useState<MacroData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -91,6 +77,25 @@ function useMacroData() {
   }, [])
 
   return { data, loading, error }
+}
+
+function useMarketSnapshot() {
+  const [indices, setIndices] = useState<MarketIndex[]>([])
+
+  useEffect(() => {
+    fetch('./data/market-data.json')
+      .then(r => r.json())
+      .then(d => {
+        const targets = ['^DJI', '^GSPC', '^IXIC', '^N225', '^KS11']
+        const filtered = targets
+          .map(sym => d.indices?.find((i: MarketIndex) => i.symbol === sym))
+          .filter(Boolean)
+        setIndices(filtered)
+      })
+      .catch(() => setIndices([]))
+  }, [])
+
+  return indices
 }
 
 /* ─── Loading & Error States ─── */
@@ -114,6 +119,186 @@ function ErrorSection() {
   )
 }
 
+/* ─── Market Snapshot Bar ─── */
+function MarketSnapshotBar({ indices }: { indices: MarketIndex[] }) {
+  const labelMap: Record<string, string> = {
+    '^DJI': '道琼斯',
+    '^GSPC': '标普500',
+    '^IXIC': '纳斯达克',
+    '^N225': '日经225',
+    '^KS11': 'KOSPI',
+  }
+
+  return (
+    <section className="snapshot-section py-8 bg-obsidian border-b border-dim/50">
+      <div className="max-w-[1200px] mx-auto px-6 md:px-20">
+        <div className="flex flex-wrap gap-4">
+          {indices.map((idx) => {
+            const isUp = idx.changePercent >= 0
+            const colorClass = isUp ? 'text-rise-green' : 'text-fall-red'
+            const bgClass = isUp ? 'bg-rise-green/5 border-rise-green/20' : 'bg-fall-red/5 border-fall-red/20'
+            return (
+              <div
+                key={idx.symbol}
+                className={`snapshot-card flex-1 min-w-[140px] rounded-lg border px-5 py-4 ${bgClass} opacity-0`}
+              >
+                <p className="font-body text-[0.75rem] text-muted tracking-wider mb-1">
+                  {labelMap[idx.symbol] || idx.name}
+                </p>
+                <p className="font-mono text-[1.25rem] text-platinum leading-none">
+                  {idx.close?.toLocaleString?.() ?? '--'}
+                </p>
+                <p className={`font-mono text-[0.875rem] ${colorClass} mt-1`}>
+                  {isUp ? '+' : ''}{idx.changePercent?.toFixed?.(2) ?? '0.00'}%
+                </p>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── AI Analyst View ─── */
+function AiAnalystView({ data }: { data: MacroData }) {
+  const hasLlm = data.llmGenerated || data.llmCached
+  const ts = data.lastUpdated?.slice(0, 10) ?? ''
+
+  return (
+    <section className="analyst-section py-[80px] bg-obsidian">
+      <div className="max-w-[900px] mx-auto px-6 md:px-20">
+        <div className="analyst-card opacity-0">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A962" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-body text-[0.8125rem] text-gold tracking-[0.1em]">
+                AI ANALYST VIEW
+                {hasLlm && (
+                  <span className="ml-2 inline-flex items-center gap-1 text-[0.6875rem] px-2 py-0.5 rounded-full bg-gold/10 text-gold">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="#C9A962">
+                      <path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z" />
+                    </svg>
+                    {data.llmCached ? '缓存分析' : '实时生成'}
+                  </span>
+                )}
+              </p>
+              <p className="font-body text-[0.6875rem] text-muted">基于金融数据与新闻深度分析 · {ts}</p>
+            </div>
+          </div>
+
+          <div className="relative pl-6 border-l-[3px] border-gold/60">
+            <p className="font-body text-[1.125rem] text-platinum leading-[1.8] italic">
+              {data.summary}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── Intelligence Feed ─── */
+function IntelligenceFeed({ newsHighlights }: { newsHighlights?: Record<string, NewsItem[]> }) {
+  const [activeTheme, setActiveTheme] = useState<string | null>(null)
+  if (!newsHighlights) return null
+  const themes = Object.keys(newsHighlights)
+  if (!themes.length) return null
+
+  return (
+    <section className="intelligence-section py-[100px] bg-charcoal">
+      <div className="max-w-[1200px] mx-auto px-6 md:px-20">
+        <div className="intelligence-header mb-10 opacity-0">
+          <p className="font-body text-[0.8125rem] text-gold tracking-[0.1em] mb-3">INTELLIGENCE FEED</p>
+          <h2 className="font-display text-[2.25rem] text-platinum leading-[1.2] tracking-[-0.01em]">
+            新闻驱动的深度观察
+          </h2>
+          <p className="font-body text-[0.9375rem] text-silver mt-3 max-w-[600px]">
+            实时抓取全球AI半导体产业链关键新闻，按主题分类并关联市场影响
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Theme sidebar */}
+          <div className="lg:col-span-1 space-y-2">
+            {themes.map((theme) => {
+              const items = newsHighlights[theme] ?? []
+              const count = items.length
+              const isActive = activeTheme === theme
+              return (
+                <button
+                  key={theme}
+                  onClick={() => setActiveTheme(isActive ? null : theme)}
+                  className={`intelligence-tab w-full text-left px-4 py-3 rounded-lg border transition-all duration-300 opacity-0 ${
+                    isActive
+                      ? 'border-gold/40 bg-gold/5'
+                      : 'border-dim/30 bg-charcoal hover:border-gold/20'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`font-body text-[0.9375rem] ${isActive ? 'text-gold' : 'text-platinum'}`}>
+                      {theme}
+                    </span>
+                    <span className="font-mono text-[0.75rem] text-muted bg-obsidian px-2 py-0.5 rounded">
+                      {count}
+                    </span>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Content panel */}
+          <div className="lg:col-span-3">
+            {activeTheme ? (
+              <div className="intelligence-panel opacity-0">
+                <div className="border border-dim/40 rounded-lg p-6 bg-obsidian">
+                  <div className="flex items-center gap-2 mb-6 pb-4 border-b border-dim/30">
+                    <div className="w-1 h-5 bg-gold rounded-full" />
+                    <h3 className="font-body text-[1.125rem] text-platinum font-medium">
+                      {activeTheme}
+                    </h3>
+                  </div>
+
+                  <div className="space-y-5">
+                    {(newsHighlights[activeTheme] ?? []).map((item, i) => (
+                      <div key={i} className="group">
+                        <p className="font-body text-[0.9375rem] text-platinum leading-[1.6] mb-2 group-hover:text-gold transition-colors">
+                          {item.title}
+                        </p>
+                        <p className="font-body text-[0.8125rem] text-silver leading-[1.6] mb-2 line-clamp-2">
+                          {item.summary}
+                        </p>
+                        <div className="flex items-center gap-3">
+                          <span className="font-mono text-[0.6875rem] text-gold bg-gold/5 px-2 py-0.5 rounded">
+                            {item.symbol}
+                          </span>
+                          <span className="font-body text-[0.6875rem] text-muted">
+                            {item.pubDate ? item.pubDate.slice(0, 10) : ''}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="intelligence-panel opacity-0 h-full flex items-center justify-center border border-dim/30 rounded-lg bg-obsidian/50">
+                <p className="font-body text-[0.9375rem] text-muted">选择左侧主题查看相关新闻</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── Ring Chart ─── */
 const DEFAULT_RING_NODES: RingNodes = {
   center: { label: 'AI芯片', r: 50 },
   inner: [
@@ -142,25 +327,14 @@ function RingChart({ ringNodes }: { ringNodes?: RingNodes }) {
 
   return (
     <svg viewBox="0 0 500 500" className="w-full max-w-[500px] mx-auto">
-      {/* Orbit rings */}
       <circle cx={cx} cy={cy} r={innerR} fill="none" stroke="#3A3A3A" strokeWidth="1" strokeDasharray="4 4" opacity="0.6" />
       <circle cx={cx} cy={cy} r={outerR} fill="none" stroke="#3A3A3A" strokeWidth="1" strokeDasharray="4 4" opacity="0.4" />
 
-      {/* Connecting lines */}
       {nodes.inner.map((node) => {
         const p1 = polar(node.angle ?? 0, nodes.center.r ?? 50 + 4)
         const p2 = polar(node.angle ?? 0, innerR - 42)
         return (
-          <line
-            key={`line-inner-${node.label}`}
-            x1={p1.x}
-            y1={p1.y}
-            x2={p2.x}
-            y2={p2.y}
-            stroke="#C9A962"
-            strokeWidth="1"
-            opacity="0.5"
-          />
+          <line key={`line-inner-${node.label}`} x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="#C9A962" strokeWidth="1" opacity="0.5" />
         )
       })}
       {nodes.outer.map((node) => {
@@ -168,20 +342,10 @@ function RingChart({ ringNodes }: { ringNodes?: RingNodes }) {
         const p1 = polar(innerAngle, innerR + 42)
         const p2 = polar(node.angle ?? 0, outerR - 40)
         return (
-          <line
-            key={`line-outer-${node.label}`}
-            x1={p1.x}
-            y1={p1.y}
-            x2={p2.x}
-            y2={p2.y}
-            stroke="#C9A962"
-            strokeWidth="1"
-            opacity="0.3"
-          />
+          <line key={`line-outer-${node.label}`} x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="#C9A962" strokeWidth="1" opacity="0.3" />
         )
       })}
 
-      {/* Center node */}
       <circle cx={cx} cy={cy} r={nodes.center.r ?? 50} fill="#141414" stroke="#C9A962" strokeWidth="2" />
       <text x={cx} y={cy - 6} textAnchor="middle" fill="#C9A962" fontSize="14" fontFamily="'Noto Sans SC', sans-serif" fontWeight="500">
         {nodes.center.label}
@@ -191,7 +355,6 @@ function RingChart({ ringNodes }: { ringNodes?: RingNodes }) {
         <animate attributeName="opacity" values="1;0.5;1" dur="3s" repeatCount="indefinite" />
       </circle>
 
-      {/* Inner ring nodes */}
       {nodes.inner.map((node) => {
         const p = polar(node.angle ?? 0, innerR)
         return (
@@ -203,7 +366,6 @@ function RingChart({ ringNodes }: { ringNodes?: RingNodes }) {
         )
       })}
 
-      {/* Outer ring nodes */}
       {nodes.outer.map((node) => {
         const p = polar(node.angle ?? 0, outerR)
         return (
@@ -246,19 +408,13 @@ function CapexPieChart({ capexData, total }: { capexData: MacroData['capex']['da
 
   return (
     <>
-      {/* Big number */}
       <div className="flex items-baseline gap-3 mb-12">
-        <span
-          ref={bigNumberRef}
-          className="font-mono text-[64px] md:text-[96px] text-gold leading-none tracking-[-0.03em]"
-          style={{ textShadow: '0 0 40px rgba(201,169,98,0.15)' }}
-        >
+        <span ref={bigNumberRef} className="font-mono text-[64px] md:text-[96px] text-gold leading-none tracking-[-0.03em]" style={{ textShadow: '0 0 40px rgba(201,169,98,0.15)' }}>
           0
         </span>
         <span className="capex-unit font-body text-[1.5rem] text-platinum opacity-0">美元</span>
       </div>
 
-      {/* Donut chart + legend */}
       <div className="flex flex-col lg:flex-row items-center gap-12 mb-16">
         <div className="capex-chart-wrap w-full lg:w-[50%] h-[360px] opacity-0">
           <ResponsiveContainer width="100%" height="100%">
@@ -286,26 +442,13 @@ function CapexPieChart({ capexData, total }: { capexData: MacroData['capex']['da
                       <text x={cx} y={cy} dy={18} textAnchor="middle" fill="#B0B0B0" fontSize={12} fontFamily="'Noto Sans SC', sans-serif">
                         {capexData[capexHover!]?.name}
                       </text>
-                      <Sector
-                        cx={cx}
-                        cy={cy}
-                        innerRadius={innerRadius}
-                        outerRadius={outerRadius + 6}
-                        startAngle={startAngle}
-                        endAngle={endAngle}
-                        fill={fill}
-                      />
+                      <Sector cx={cx} cy={cy} innerRadius={innerRadius} outerRadius={outerRadius + 6} startAngle={startAngle} endAngle={endAngle} fill={fill} />
                     </g>
                   )
                 }}
               >
                 {capexData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.color}
-                    opacity={capexHover === null || capexHover === index ? 1 : 0.5}
-                    stroke="none"
-                  />
+                  <Cell key={`cell-${index}`} fill={entry.color} opacity={capexHover === null || capexHover === index ? 1 : 0.5} stroke="none" />
                 ))}
               </Pie>
               <Tooltip
@@ -349,6 +492,7 @@ function CapexPieChart({ capexData, total }: { capexData: MacroData['capex']['da
 /* ─── Macro Page ─── */
 export default function Macro() {
   const { data, loading, error } = useMacroData()
+  const marketIndices = useMarketSnapshot()
   const containerRef = useRef<HTMLDivElement>(null)
 
   useGSAP(() => {
@@ -369,7 +513,20 @@ export default function Macro() {
       gsap.fromTo('.macro-hero-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', delay: 0.3 })
       gsap.fromTo('.macro-hero-sub', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', delay: 0.6 })
 
-      // Section 2: AI Supercycle
+      // Snapshot cards
+      gsap.fromTo('.snapshot-card', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power2.out', delay: 0.8 })
+
+      // AI Analyst View
+      ScrollTrigger.create({
+        trigger: '.analyst-section',
+        start: 'top 85%',
+        once: true,
+        onEnter: () => {
+          gsap.fromTo('.analyst-card', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' })
+        },
+      })
+
+      // Section: AI Supercycle
       ScrollTrigger.create({
         trigger: '.supercycle-section',
         start: 'top 85%',
@@ -383,7 +540,7 @@ export default function Macro() {
         },
       })
 
-      // Section 3: Geopolitics
+      // Section: Geopolitics
       ScrollTrigger.create({
         trigger: '.geopolitics-section',
         start: 'top 85%',
@@ -399,7 +556,7 @@ export default function Macro() {
         },
       })
 
-      // Section 4: Capital Expenditure
+      // Section: Capital Expenditure
       ScrollTrigger.create({
         trigger: '.capex-section',
         start: 'top 85%',
@@ -414,16 +571,15 @@ export default function Macro() {
         },
       })
 
-      // Section 5: Summary
+      // Section: Intelligence Feed
       ScrollTrigger.create({
-        trigger: '.summary-section',
+        trigger: '.intelligence-section',
         start: 'top 85%',
         once: true,
         onEnter: () => {
-          gsap.fromTo('.summary-title', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' })
-          gsap.fromTo('.summary-line-top', { width: 0 }, { width: 40, duration: 1, ease: 'power3.out', delay: 0.3 })
-          gsap.fromTo('.summary-text', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.9, ease: 'power2.out', delay: 0.5 })
-          gsap.fromTo('.summary-line-bot', { width: 0 }, { width: 40, duration: 1, ease: 'power3.out', delay: 0.8 })
+          gsap.fromTo('.intelligence-header', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' })
+          gsap.fromTo('.intelligence-tab', { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.6, stagger: 0.1, ease: 'power2.out', delay: 0.3 })
+          gsap.fromTo('.intelligence-panel', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', delay: 0.5 })
         },
       })
     }, containerRef)
@@ -450,7 +606,7 @@ export default function Macro() {
   return (
     <div ref={containerRef} className="bg-obsidian">
       {/* ===== Section 1: Hero ===== */}
-      <section className="relative w-full overflow-hidden" style={{ height: '60vh', minHeight: '500px' }}>
+      <section className="relative w-full overflow-hidden" style={{ height: '55vh', minHeight: '480px' }}>
         <div
           className="macro-hero-bg absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${macroBg})`, transformOrigin: 'center center' }}
@@ -472,11 +628,16 @@ export default function Macro() {
         </div>
       </section>
 
-      {/* ===== Section 2: AI Supercycle ===== */}
+      {/* ===== Section 2: Market Snapshot ===== */}
+      <MarketSnapshotBar indices={marketIndices} />
+
+      {/* ===== Section 3: AI Analyst View ===== */}
+      <AiAnalystView data={data} />
+
+      {/* ===== Section 4: AI Supercycle ===== */}
       <section className="supercycle-section py-[120px] bg-obsidian">
         <div className="max-w-[1200px] mx-auto px-6 md:px-20">
           <div className="flex flex-col lg:flex-row gap-16 items-start">
-            {/* Text area */}
             <div className="lg:w-[55%]">
               <p className="supercycle-label font-body text-[0.8125rem] text-gold tracking-[0.1em] mb-3 opacity-0">
                 SUPERCYCLE
@@ -489,14 +650,11 @@ export default function Macro() {
                 {data.supercycle.arguments.map((arg, i) => (
                   <div key={i} className="supercycle-arg opacity-0">
                     <h3 className="font-body text-[1.125rem] text-platinum font-medium mb-2">{arg.title}</h3>
-                    <p className="font-body text-[1.0625rem] text-silver leading-[1.7]">
-                      {arg.content}
-                    </p>
+                    <p className="font-body text-[1.0625rem] text-silver leading-[1.7]">{arg.content}</p>
                   </div>
                 ))}
               </div>
 
-              {/* Key data highlights */}
               <div className="flex flex-wrap gap-8 mt-12">
                 {data.supercycle.stats.map((stat, i) => (
                   <div key={i} className="supercycle-stat opacity-0">
@@ -507,15 +665,14 @@ export default function Macro() {
               </div>
             </div>
 
-            {/* Visual area */}
             <div className="lg:w-[45%] flex items-center justify-center ring-chart-wrap opacity-0">
-              <RingChart />
+              <RingChart ringNodes={data.ringNodes} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ===== Section 3: Geopolitics ===== */}
+      {/* ===== Section 5: Geopolitics ===== */}
       <section className="geopolitics-section py-[120px] bg-charcoal">
         <div className="max-w-[1200px] mx-auto px-6 md:px-20">
           <div className="geo-header mb-12 opacity-0">
@@ -526,7 +683,6 @@ export default function Macro() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {/* Left column */}
             <div className="geo-left opacity-0">
               <h3 className="font-body text-[1.5rem] text-platinum font-medium mb-4">{data.geopolitics.leftColumn.title}</h3>
               <p className="font-body text-[1.0625rem] text-silver leading-[1.7] mb-8">
@@ -543,7 +699,6 @@ export default function Macro() {
               </div>
             </div>
 
-            {/* Right column */}
             <div className="geo-right opacity-0">
               <h3 className="font-body text-[1.5rem] text-platinum font-medium mb-4">{data.geopolitics.rightColumn.title}</h3>
               <p className="font-body text-[1.0625rem] text-silver leading-[1.7] mb-8">
@@ -561,7 +716,6 @@ export default function Macro() {
             </div>
           </div>
 
-          {/* Bottom summary */}
           <div className="mt-16 flex flex-col items-center text-center">
             <div className="geo-line h-[1px] bg-gold mb-8" style={{ width: 0, opacity: 0.6 }} />
             <p className="geo-summary font-body text-[1.0625rem] text-light-gold italic leading-[1.7] max-w-[800px] opacity-0">
@@ -571,7 +725,7 @@ export default function Macro() {
         </div>
       </section>
 
-      {/* ===== Section 4: Capital Expenditure ===== */}
+      {/* ===== Section 6: Capital Expenditure ===== */}
       <section className="capex-section py-[120px] bg-obsidian">
         <div className="max-w-[1200px] mx-auto px-6 md:px-20">
           <div className="capex-header mb-12 opacity-0">
@@ -587,7 +741,6 @@ export default function Macro() {
 
           <CapexPieChart capexData={data.capex.data} total={data.capex.total} />
 
-          {/* Trend paragraph */}
           <div className="capex-trend mb-12 opacity-0">
             <h4 className="font-body text-[1.125rem] text-platinum mb-3">{data.capex.trend.title}</h4>
             <p className="font-body text-[1.0625rem] text-silver leading-[1.7] max-w-[800px]">
@@ -595,7 +748,6 @@ export default function Macro() {
             </p>
           </div>
 
-          {/* Key conclusion */}
           <div className="capex-conclusion max-w-[720px] mx-auto opacity-0">
             <div
               className="font-body text-[0.9375rem] text-light-gold text-center leading-[1.6] px-8 py-6 rounded-lg"
@@ -607,45 +759,8 @@ export default function Macro() {
         </div>
       </section>
 
-      {/* ===== Section 5: Live News Highlights ===== */}
-      {data.newsHighlights && Object.keys(data.newsHighlights).length > 0 && (
-        <section className="news-section py-[100px] bg-obsidian">
-          <div className="max-w-[1200px] mx-auto px-6 md:px-20">
-            <p className="font-body text-[0.8125rem] text-gold tracking-[0.1em] mb-3">LIVE NEWS</p>
-            <h2 className="font-display text-[2.25rem] text-platinum mb-10">本期关键新闻</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {Object.entries(data.newsHighlights).map(([theme, items]) => (
-                <div key={theme} className="border border-muted/30 rounded-lg p-6">
-                  <p className="font-body text-[0.75rem] text-gold tracking-wider mb-4">{theme}</p>
-                  {items.map((n, i) => (
-                    <div key={i} className="mb-4 pb-4 border-b border-muted/20 last:border-0 last:mb-0 last:pb-0">
-                      <p className="font-body text-[0.9375rem] text-platinum leading-[1.5] mb-1">{n.title}</p>
-                      <p className="font-body text-[0.75rem] text-muted">{n.symbol} · {n.pubDate ? n.pubDate.slice(0, 10) : ''}</p>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ===== Section 6: Macro Summary ===== */}
-      <section className="summary-section py-[100px] bg-charcoal">
-        <div className="max-w-[900px] mx-auto px-6 md:px-20 text-center">
-          <h2 className="summary-title font-display text-[2.25rem] text-platinum leading-[1.2] tracking-[-0.01em] mb-8 opacity-0">
-            宏观总结
-          </h2>
-
-          <div className="summary-line-top h-[1px] bg-gold mx-auto mb-8" style={{ width: 0, opacity: 0.6 }} />
-
-          <p className="summary-text font-body text-[1.0625rem] text-platinum leading-[1.9] opacity-0">
-            {data.summary}
-          </p>
-
-          <div className="summary-line-bot h-[1px] bg-gold mx-auto mt-8" style={{ width: 0, opacity: 0.6 }} />
-        </div>
-      </section>
+      {/* ===== Section 7: Intelligence Feed ===== */}
+      <IntelligenceFeed newsHighlights={data.newsHighlights} />
     </div>
   )
 }

@@ -1,18 +1,58 @@
 {
-  "summary": "美股表现稳健，亚洲市场短期调整，全球分化格局延续",
+  "summary": "全球市场同步上涨，风险偏好全面回升，AI产业链引领涨势",
+  "ringNodes": {
+    "center": {
+      "label": "AI芯片",
+      "r": 50
+    },
+    "inner": [
+      {
+        "label": "设计",
+        "sub": "NVIDIA / AMD",
+        "angle": -90
+      },
+      {
+        "label": "存储",
+        "sub": "SK海力士 / 三星",
+        "angle": 30
+      },
+      {
+        "label": "设备",
+        "sub": "东京电子 / 爱德万",
+        "angle": 150
+      }
+    ],
+    "outer": [
+      {
+        "label": "微软",
+        "sub": "Azure",
+        "angle": -30
+      },
+      {
+        "label": "亚马逊",
+        "sub": "AWS",
+        "angle": 90
+      },
+      {
+        "label": "谷歌",
+        "sub": "GCP",
+        "angle": 210
+      }
+    ]
+  },
   "supercycle": {
     "arguments": [
       {
         "title": "算力需求呈指数级增长",
-        "content": "全球九大CSP资本支出维持高位，AI芯片需求持续强劲。当前道指+0.86%、日经-0.19%、KOSPI+0.11%的收盘表现，反映市场对AI产业链的信心分化。"
+        "content": "全球九大CSP资本支出维持高位，AI芯片需求持续强劲。当前道指+0.16%、日经-0.00%、KOSPI+0.00%的收盘表现，反映市场对AI产业链的信心分化。"
       },
       {
         "title": "HBM成为性能瓶颈与价值核心",
-        "content": "从HBM2E到HBM3E再到HBM4，每一代堆叠层数翻倍，带宽提升40%以上。SK海力士凭借与NVIDIA的深度绑定，建立了难以逾越的技术护城河。"
+        "content": "HBM新闻热度极高，本周3条相关报道。从HBM2E到HBM3E再到HBM4，每一代堆叠层数翻倍，带宽提升40%以上。SK海力士凭借与NVIDIA的深度绑定，建立了难以逾越的技术护城河。"
       },
       {
         "title": "CSP资本支出创历史纪录",
-        "content": "微软、亚马逊、谷歌等云厂商2026年AI基建投资超过8,300亿美元，同比增长79%。这笔巨额资本支出正在创造半导体行业历史上最大的需求浪潮。"
+        "content": "本周共3条CSP资本开支新闻，云厂商投资竞赛白热化。微软、亚马逊、谷歌2026年AI基建投资超过8,300亿美元，同比增长79%。"
       }
     ],
     "stats": [
@@ -32,12 +72,13 @@
   },
   "geopolitics": {
     "leftColumn": {
-      "title": "贸易摩擦与供应链重构",
-      "content": "美国可能进一步加征汽车/半导体关税，但日韩与AI供应链关系紧密，相对免疫。中国半导体自主化加速，对全球格局产生深远影响。",
+      "title": "贸易摩擦升级",
+      "content": "本周地缘相关新闻3条，关税与出口管制成为市场焦点。美国可能进一步加征汽车/半导体关税，中国半导体自主化加速。",
       "impacts": [
         "关税不确定性：对道指工业股构成阶段性压力",
         "供应链区域化：东亚半导体产业链地位进一步强化",
-        "技术封锁：倒逼中国半导体自主化进程加速"
+        "技术封锁：倒逼中国半导体自主化进程加速",
+        "全球资本流向避险资产"
       ]
     },
     "rightColumn": {
@@ -45,23 +86,23 @@
       "content": "市场对美联储政策预期持续影响全球资本流动。美元指数波动直接影响出口型企业盈利预期和跨国资本配置。",
       "data": [
         {
-          "value": "+0.86%",
+          "value": "+0.16%",
           "label": "美股平均涨跌幅",
           "color": "rise-green"
         },
         {
-          "value": "-0.19%",
+          "value": "-0.00%",
           "label": "日经225",
-          "color": "fall-red"
+          "color": "rise-green"
         },
         {
-          "value": "+0.11%",
+          "value": "+0.00%",
           "label": "KOSPI",
           "color": "rise-green"
         }
       ]
     },
-    "summary": "美股韧性显现，亚洲市场进入阶段性整固，中长期向上逻辑未变。"
+    "summary": "全球资本市场风险偏好同步回升，AI超级周期成为跨市场主线叙事。"
   },
   "capex": {
     "total": 8300,
@@ -119,9 +160,111 @@
     ],
     "trend": {
       "title": "资本支出趋势",
-      "content": "当前市场环境下，云厂商资本支出增速与股价表现出现分化。道指+0.86%、日经-0.19%、KOSPI+0.11%的收盘数据表明，资金正在从纯粹的概念炒作向有实际订单支撑的设备商和存储商集中。"
+      "content": "当前市场环境下，云厂商资本支出增速与股价表现出现分化。道指+0.16%、日经-0.00%、KOSPI+0.00%的收盘数据表明，资金正在从纯粹的概念炒作向有实际订单支撑的设备商和存储商集中。"
     },
     "conclusion": "云服务商的8,300亿美元资本支出是整个产业链的终端买单方，它们的支出决定上游所有环节的需求强度。当前正处于资本开支扩张周期的中段，设备商和存储商将是最确定的受益者。"
   },
-  "lastUpdated": "2026-05-11T06:43:58+08:00"
+  "lastUpdated": "2026-05-12T05:29:01+08:00",
+  "newsHighlights": {
+    "AI Capex": [
+      {
+        "title": "Big Tech earnings reinforce strength of AI demand across chips, cloud and software: Wedbush",
+        "summary": "Big tech firms are poised to extend their rally following a strong earnings season and continued momentum in artificial intelligence spending, according to Wedbush analysts, who pointed to acceleratin",
+        "pubDate": "2026-05-11T19:51:00Z",
+        "symbol": "AMD"
+      },
+      {
+        "title": "Microsoft Retirement Buyout Highlights Evolving Workforce And AI Investment Priorities",
+        "summary": "Microsoft (NasdaqGS:MSFT) has launched a large voluntary retirement buyout program for eligible U.S. employees. The offer includes extended cash payouts and healthcare benefits tied to specific age an",
+        "pubDate": "2026-05-11T20:13:24Z",
+        "symbol": "MSFT"
+      },
+      {
+        "title": "Big Tech Keeps Piling On AI Debt. Spending Is Set to Soar.",
+        "summary": "Gone are the days when operating cash flow could cover the bills. 2026 is shaping up to be a milestone year.",
+        "pubDate": "2026-05-11T19:07:00Z",
+        "symbol": "MSFT"
+      }
+    ],
+    "HBM/存储": [
+      {
+        "title": "Memory chip stocks hit record highs, pharma reacts to hantavirus concerns",
+        "summary": "Market Catalysts Host Julie Hyman and Yahoo Finance Senior Reporter Brooke DiPalma track several of the day's top trending stock tickers, including memory chip stocks Micron Technology (MU), Intel (IN",
+        "pubDate": "2026-05-11T14:54:55Z",
+        "symbol": "NVDA"
+      },
+      {
+        "title": "Intel stock pops on advanced AI packaging partnership report",
+        "summary": "Intel may have found its next AI growth catalyst with SK hynix partnership",
+        "pubDate": "2026-05-11T16:54:34Z",
+        "symbol": "TSM"
+      },
+      {
+        "title": "Micron and SK Hynix Stocks Surge. Thank Trouble at Samsung.",
+        "summary": "Micron and SK Hynix stocks rose Monday. Memory-chip rival Samsung could be about to take a hit to production.",
+        "pubDate": "2026-05-11T19:24:00Z",
+        "symbol": "005930.KS"
+      }
+    ],
+    "AI芯片": [
+      {
+        "title": "Intel stock rises as CEO Lip-Bu Tan touts 'exciting new products' with Nvidia",
+        "summary": "Intel stock rose Monday as CEO Lip-Bu Tan touted 'exciting' products with Nvidia.",
+        "pubDate": "2026-05-11T15:47:50Z",
+        "symbol": "NVDA"
+      },
+      {
+        "title": "Nvidia bull unveils bold new AI trade Wall Street hasn't named yet",
+        "summary": "Nvidia super bull spots mysterious new AI trend after 80x call",
+        "pubDate": "2026-05-11T21:26:14Z",
+        "symbol": "NVDA"
+      },
+      {
+        "title": "Nvidia Stock Heads for Record. What Can Give It Another Boost.",
+        "summary": "Nvidia  stock was rising Monday as investor enthusiasm over the chip sector spilled over to the relative laggard of the bunch.  Shares were up 2.7% to $220.92 on Monday, putting Nvidia on track for a ",
+        "pubDate": "2026-05-11T19:36:00Z",
+        "symbol": "AMD"
+      }
+    ],
+    "地缘/关税": [
+      {
+        "title": "Markets swing between AI optimism and oil fears",
+        "summary": "Shell and Toyota warn geopolitical risks remain elevated",
+        "pubDate": "2026-05-11T14:42:04Z",
+        "symbol": "AMD"
+      },
+      {
+        "title": "Dua Lipa sues Samsung for allegedly using her image to sell TVs",
+        "summary": "<body><p>STORY: :: This video contains flashing images</p><p>British pop star Dua Lipa has filed a lawsuit against Samsung Electronics.</p><p>She's seeking at least $15 million in damages...</p><p>and",
+        "pubDate": "2026-05-11T09:11:16Z",
+        "symbol": "005930.KS"
+      },
+      {
+        "title": "Traders Looking for Next Leg in Global Stocks Rally Bet on Asia",
+        "summary": "(Bloomberg) -- As the focus moves away from the Iran war, investors and strategists alike are looking for the next leg up in equities. Many are turning to Asia. Most Read from BloombergIran Makes New ",
+        "pubDate": "2026-05-09T22:00:00Z",
+        "symbol": "000660.KS"
+      }
+    ],
+    "货币政策": [
+      {
+        "title": "Dow Jones Futures: AI, Chip Stocks Thrive Despite Oil Prices, Trump Comments; CPI Inflation Due",
+        "summary": "The major indexes rose slightly Monday as AI and chips shrugged off higher oil prices as Trump said Iran ceasefire \"on life support.\"",
+        "pubDate": "2026-05-11T21:12:52Z",
+        "symbol": "NVDA"
+      },
+      {
+        "title": "Nuclear Reactor Leader Constellation Backs Three Mile Island Goal",
+        "summary": "Constellation Energy earnings surged 28% and revenue sharply accelerated. But the nuclear stock undercut key level.",
+        "pubDate": "2026-05-11T20:12:45Z",
+        "symbol": "MSFT"
+      },
+      {
+        "title": "By the numbers: Corporate profits haven't been this smoking hot in years",
+        "summary": "It has been a wow earnings season.",
+        "pubDate": "2026-05-11T17:52:43Z",
+        "symbol": "AMZN"
+      }
+    ]
+  }
 }

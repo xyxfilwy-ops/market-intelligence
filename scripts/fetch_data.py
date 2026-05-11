@@ -5,11 +5,20 @@ Uses yfinance (free) to fetch market data and generates JSON data files for the 
 """
 
 import json
+import math
 import os
 import sys
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any
+
+
+def _safe_pct(data: Dict[str, Any], key: str = "changePercent", default: float = 0.0) -> float:
+    """Safely extract a percentage value, treating NaN as default."""
+    val = data.get(key, default)
+    if isinstance(val, float) and math.isnan(val):
+        return default
+    return val if val is not None else default
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -545,9 +554,9 @@ def get_macro_data(indices_data: List[Dict[str, Any]], news_highlights: Dict[str
     kospi = index_map.get("^KS11", {})
 
     # Determine market trend summary
-    us_avg_change = sum(idx.get("changePercent", 0) for idx in us_indices) / len(us_indices) if us_indices else 0
-    nikkei_change = nikkei.get("changePercent", 0)
-    kospi_change = kospi.get("changePercent", 0)
+    us_avg_change = sum(_safe_pct(idx) for idx in us_indices) / len(us_indices) if us_indices else 0
+    nikkei_change = _safe_pct(nikkei)
+    kospi_change = _safe_pct(kospi)
 
     # News-driven dynamic args
     hbm_count = len(news_highlights.get("HBM/存储", []))
@@ -985,7 +994,7 @@ def get_chain_data(indices_data: List[Dict[str, Any]], news_highlights: Dict[str
     news_highlights = news_highlights or {}
     index_map = {idx["symbol"]: idx for idx in indices_data}
     nikkei = index_map.get("^N225", {})
-    nikkei_change = nikkei.get("changePercent", 0)
+    nikkei_change = _safe_pct(nikkei)
 
     layers = []
     for layer_cfg in CHAIN_LAYER_CONFIG:
@@ -997,11 +1006,11 @@ def get_chain_data(indices_data: List[Dict[str, Any]], news_highlights: Dict[str
         related_change = 0.0
         if any(s in ["NVDA", "AMD", "MSFT", "AMZN", "GOOGL", "META"] for s in symbols):
             us = [index_map.get("^DJI", {}), index_map.get("^GSPC", {}), index_map.get("^IXIC", {})]
-            related_change = sum(i.get("changePercent", 0) for i in us) / len(us) if us else 0
+            related_change = sum(_safe_pct(i) for i in us) / len(us) if us else 0
         elif any(s in ["8035.T", "6857.T", "ASML"] for s in symbols):
             related_change = nikkei_change
         elif any(s in ["000660.KS", "005930.KS"] for s in symbols):
-            related_change = index_map.get("^KS11", {}).get("changePercent", 0)
+            related_change = _safe_pct(index_map.get("^KS11", {}))
         else:
             related_change = nikkei_change
 
@@ -1062,7 +1071,7 @@ def get_chain_data(indices_data: List[Dict[str, Any]], news_highlights: Dict[str
     }
 
     # Dynamic summary
-    us_avg = sum(index_map.get(s, {}).get("changePercent", 0) for s in ["^DJI", "^GSPC", "^IXIC"]) / 3
+    us_avg = sum(_safe_pct(index_map.get(s, {})) for s in ["^DJI", "^GSPC", "^IXIC"]) / 3
     if us_avg >= 0.5 and nikkei_change >= 0.5:
         summary = f"全球AI半导体产业链全线走强：云服务商资本支出驱动芯片设计订单爆发，HBM存储和半导体设备紧随其后。当前美股平均上涨{us_avg:+.2f}%，日经225上涨{nikkei_change:+.2f}%，软银集团作为投资层捕获全产业链价值。"
     elif us_avg <= -0.5 and nikkei_change <= -0.5:
@@ -1241,9 +1250,9 @@ def _make_hero_subtitle(indices_data: List[Dict[str, Any]]) -> str:
     kospi = next((i for i in indices_data if i["symbol"] == "^KS11"), {})
     date_str = datetime.now(timezone(timedelta(hours=8))).strftime("%Y年%m月%d日")
 
-    us_avg = sum(i.get("changePercent", 0) for i in us) / len(us) if us else 0
-    nikkei_change = nikkei.get("changePercent", 0)
-    kospi_change = kospi.get("changePercent", 0)
+    us_avg = sum(_safe_pct(i) for i in us) / len(us) if us else 0
+    nikkei_change = _safe_pct(nikkei)
+    kospi_change = _safe_pct(kospi)
 
     status = "全线收涨" if us_avg >= 0 and nikkei_change >= 0 and kospi_change >= 0 else \
              "全线收跌" if us_avg < 0 and nikkei_change < 0 and kospi_change < 0 else \
@@ -1259,9 +1268,9 @@ def _make_us_descriptions(indices_data: List[Dict[str, Any]]) -> List[str]:
     spx = us.get("^GSPC", {})
     ndx = us.get("^IXIC", {})
 
-    dji_pct = dji.get("changePercent", 0)
-    spx_pct = spx.get("changePercent", 0)
-    ndx_pct = ndx.get("changePercent", 0)
+    dji_pct = _safe_pct(dji)
+    spx_pct = _safe_pct(spx)
+    ndx_pct = _safe_pct(ndx)
 
     descs = []
     # Dow
@@ -1330,9 +1339,9 @@ def _make_cross_market_summary(indices_data: List[Dict[str, Any]]) -> str:
     nikkei = next((i for i in indices_data if i["symbol"] == "^N225"), {})
     kospi = next((i for i in indices_data if i["symbol"] == "^KS11"), {})
 
-    us_avg = sum(i.get("changePercent", 0) for i in us) / len(us) if us else 0
-    nikkei_change = nikkei.get("changePercent", 0)
-    kospi_change = kospi.get("changePercent", 0)
+    us_avg = sum(_safe_pct(i) for i in us) / len(us) if us else 0
+    nikkei_change = _safe_pct(nikkei)
+    kospi_change = _safe_pct(kospi)
 
     asia_up = nikkei_change >= 0 and kospi_change >= 0
     us_up = us_avg >= 0
@@ -1354,7 +1363,7 @@ def enrich_market_data(market_data: Dict[str, Any], leaders_data: List[Dict[str,
 
     for idx in indices:
         symbol = idx["symbol"]
-        change_pct = idx.get("changePercent", 0)
+        change_pct = _safe_pct(idx)
         leaders = leaders_map.get(symbol, {})
         top3 = leaders.get("topContributors", [])
 
@@ -1379,11 +1388,11 @@ def enrich_market_data(market_data: Dict[str, Any], leaders_data: List[Dict[str,
     market_data["crossMarketSummary"] = _make_cross_market_summary(indices)
     market_data["usDescriptions"] = _make_us_descriptions(indices)
     market_data["nikkeiDrivers"] = _make_nikkei_drivers(
-        next((i.get("changePercent", 0) for i in indices if i["symbol"] == "^N225"), 0),
+        next((_safe_pct(i) for i in indices if i["symbol"] == "^N225"), 0),
         leaders_map.get("^N225", {}).get("topContributors", [])
     )
     market_data["kospiBackground"] = _make_kospi_background(
-        next((i.get("changePercent", 0) for i in indices if i["symbol"] == "^KS11"), 0),
+        next((_safe_pct(i) for i in indices if i["symbol"] == "^KS11"), 0),
         leaders_map.get("^KS11", {}).get("topContributors", [])
     )
 
@@ -1391,9 +1400,34 @@ def enrich_market_data(market_data: Dict[str, Any], leaders_data: List[Dict[str,
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
+def _load_previous(path: str) -> Dict[str, Any]:
+    """Load previous JSON output if it exists."""
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
+
+
+def _is_fresh(last_updated: str, max_hours: int = 168) -> bool:
+    """Check if lastUpdated is within max_hours (default 7 days)."""
+    try:
+        dt = datetime.fromisoformat(last_updated)
+        return (datetime.now(timezone.utc) - dt) < timedelta(hours=max_hours)
+    except Exception:
+        return False
+
+
 def main():
     ts = now_shanghai()
     logger.info(f"=== Market Data Fetch Started at {ts} ===")
+
+    # Pre-load previous outputs for LLM fallback
+    prev_macro = _load_previous(os.path.join(OUTPUT_DIR, "macro-data.json"))
+    prev_chain = _load_previous(os.path.join(OUTPUT_DIR, "chain-data.json"))
 
     # --- 1. Fetch market data ---
     try:
@@ -1443,6 +1477,12 @@ def main():
         macro_data = get_macro_data(indices_data, news_highlights)
         macro_data["lastUpdated"] = ts
         macro_data["newsHighlights"] = news_highlights
+        # Fallback: if LLM failed this run but previous run had LLM content, reuse it
+        if not macro_data.get("llmGenerated") and prev_macro.get("llmGenerated") and _is_fresh(prev_macro.get("lastUpdated", "")):
+            macro_data["summary"] = prev_macro["summary"]
+            macro_data["llmGenerated"] = True
+            macro_data["llmCached"] = True
+            logger.info("Reused previous LLM macro summary (cache fallback)")
         logger.info("Built macro data")
     except Exception as e:
         logger.error(f"Error building macro data: {e}")
@@ -1452,6 +1492,16 @@ def main():
     try:
         chain_data = get_chain_data(indices_data, news_highlights)
         chain_data["newsHighlights"] = news_highlights
+        # Fallback: reuse previous LLM layer descriptions if current run failed
+        if prev_chain.get("layers") and _is_fresh(prev_chain.get("lastUpdated", "")):
+            prev_layers = {l["id"]: l for l in prev_chain.get("layers", []) if l.get("llmGenerated")}
+            for layer in chain_data.get("layers", []):
+                if not layer.get("llmGenerated") and layer["id"] in prev_layers:
+                    layer["desc"] = prev_layers[layer["id"]]["desc"]
+                    layer["llmGenerated"] = True
+                    layer["llmCached"] = True
+            if any(l.get("llmCached") for l in chain_data.get("layers", [])):
+                logger.info("Reused previous LLM chain layer descriptions (cache fallback)")
         logger.info("Built chain data with news-driven descriptions")
     except Exception as e:
         logger.error(f"Error building chain data: {e}")
